@@ -12,8 +12,10 @@ public record OrderBookDTO(
         @PositiveOrZero(message = "Must be positive or zero")
         Double soldValue,
         @NotNull(message = "It is necessary to inform the book that was sold")
-        BookDTO bookDTO) {
-    public static OrderBookDTO fromOrderBook(OrderBook orderBook){
-        return new OrderBookDTO(orderBook.getId(), orderBook.getQuantity(), orderBook.getSoldValue(), BookDTO.fromBook(orderBook.getBook()));
+        BookDTO bookDTO,
+        Double subtotal) {
+    public static OrderBookDTO fromOrderBook(OrderBook orderBook, Double subtotal){
+
+        return new OrderBookDTO(orderBook.getId(), orderBook.getQuantity(), orderBook.getSoldValue(), BookDTO.fromBook(orderBook.getBook()),subtotal);
     }
 }
