@@ -3,6 +3,7 @@ package com.radixlogos.littlebookstore.entities;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -10,14 +11,11 @@ import java.util.Set;
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String name;
-    String editor;
-    Integer stockQuantity;
-    Double price;
-
-    @OneToMany(mappedBy = "book")
-    Set<OrderBook> orderBook = new HashSet<>();
+    private Long id;
+    private String name;
+    private String editor;
+    private Integer stockQuantity;
+    private Double price;
 
     public Book() {
     }
@@ -69,11 +67,15 @@ public class Book {
         this.price = price;
     }
 
-    public Set<OrderBook> getOrderBook() {
-        return orderBook;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return Objects.equals(id, book.id);
     }
 
-    public void setOrderBook(OrderBook orderBook) {
-        this.orderBook.add(orderBook);
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
