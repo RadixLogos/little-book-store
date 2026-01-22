@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface BookRepository extends JpaRepository<Book,Long> {
-    @Query("SELECT obj FROM Book obj WHERE UPPER(obj.name) LIKE UPPER(':name%')")
+    @Query("SELECT obj FROM Book obj WHERE UPPER(obj.name) LIKE UPPER(CONCAT(:name,'%'))")
     public Page<Book> findAllPaged(Pageable pageable, String name);
 }
