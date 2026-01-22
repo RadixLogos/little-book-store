@@ -13,9 +13,12 @@ public class OrderBook {
     private Long id;
     private Integer quantity;
     private Double soldValue;
+    private Double subTotal;
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
+    @ManyToOne
+    private BuyOrder buyOrder;
     public OrderBook() {
     }
 
@@ -43,6 +46,14 @@ public class OrderBook {
         this.soldValue = soldValue;
     }
 
+    public Double getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(Double subTotal) {
+        this.subTotal = subTotal;
+    }
+
     public Book getBook() {
         return book;
     }
@@ -50,6 +61,4 @@ public class OrderBook {
     public void setBook(Book book) {
         this.book = book;
     }
-
-
 }
