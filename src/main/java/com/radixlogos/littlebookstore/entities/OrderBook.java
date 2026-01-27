@@ -14,7 +14,7 @@ public class OrderBook {
     private Integer quantity;
     private Double soldValue;
     private Double subTotal;
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "book_id")
     private Book book;
     @ManyToOne
