@@ -3,8 +3,8 @@ package com.radixlogos.littlebookstore.services;
 import com.radixlogos.littlebookstore.dto.BookDTO;
 import com.radixlogos.littlebookstore.entities.Book;
 import com.radixlogos.littlebookstore.repositories.BookRepository;
-import com.radixlogos.littlebookstore.services.exceptions.BookException;
-import com.radixlogos.littlebookstore.services.exceptions.BookNotFoundException;
+import com.radixlogos.littlebookstore.services.exceptions.DatabaseException;
+import com.radixlogos.littlebookstore.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ public class BookService {
     @Transactional(readOnly = true)
     public BookDTO findBookById(Long bookId){
         if(bookRepository.findById(bookId).isEmpty()){
-            throw new BookNotFoundException("Livro não encontrado");
+            throw new ResourceNotFoundException("Livro não encontrado");
         }
         return BookDTO.fromBook(bookRepository.findById(bookId).get());
     }
@@ -39,7 +39,7 @@ public class BookService {
     @Transactional
     public BookDTO updateBook(Long bookId, BookDTO bookDTO){
         if(!bookRepository.existsById(bookId)){
-            throw new BookNotFoundException("Livro não encontrado");
+            throw new ResourceNotFoundException("Livro não encontrado");
         }
         var book = bookRepository.getReferenceById(bookId);
         copyDTOToEntity(book,bookDTO);
@@ -50,13 +50,13 @@ public class BookService {
     @Transactional
     public void deleteBook(Long bookId){
         if(!bookRepository.existsById(bookId)){
-            throw new BookNotFoundException("Livro não encontrado");
+            throw new ResourceNotFoundException("Livro não encontrado");
         }
         try{
         bookRepository.deleteById(bookId);
 
         }catch (DataIntegrityViolationException e){
-            throw new BookException("Falha de integridade referencial");
+            throw new DatabaseException("Falha de integridade referencial");
         }
 
     }

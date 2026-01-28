@@ -4,8 +4,8 @@ import com.radixlogos.littlebookstore.dto.OrderBookDTO;
 import com.radixlogos.littlebookstore.entities.OrderBook;
 import com.radixlogos.littlebookstore.repositories.BookRepository;
 import com.radixlogos.littlebookstore.repositories.OrderBookRepository;
-import com.radixlogos.littlebookstore.services.exceptions.BookNotFoundException;
-import com.radixlogos.littlebookstore.services.exceptions.OrderNotFoundException;
+import com.radixlogos.littlebookstore.services.exceptions.DatabaseException;
+import com.radixlogos.littlebookstore.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +27,7 @@ public class OrderBookService {
     @Transactional(readOnly = true)
     public OrderBookDTO findOrderById(Long orderId){
         var response = orderBookRepository.findById(orderId)
-                .orElseThrow(()-> new OrderNotFoundException("Pedido não encontrado"));
+                .orElseThrow(()-> new ResourceNotFoundException("Pedido não encontrado"));
         return OrderBookDTO.fromOrderBook(response);
     }
     @Transactional
@@ -41,14 +41,26 @@ public class OrderBookService {
     public OrderBookDTO updateOrderBook(Long orderBookId,OrderBookDTO orderBookDTO){
         var orderBookEntity = orderBookRepository.getReferenceById(orderBookId);
         if(orderBookEntity.getId() == null)
-            throw new OrderNotFoundException("Pedido não encontrado");
+            throw new ResourceNotFoundException("Pedido não encontrado");
         copyDtoToEntity(orderBookDTO,orderBookEntity);
         orderBookEntity = orderBookRepository.save(orderBookEntity);
         return OrderBookDTO.fromOrderBook(orderBookEntity);
     }
+    @Transactional
+    public void deleteOrderBook(Long id){
+        if(!orderBookRepository.existsById(id)){
+            throw new ResourceNotFoundException("Pedido de livro não encontrado");
+        }
+        try{
+            orderBookRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new DatabaseException("Falaha de integridade referencial");
+        }
+    }
+
     private void copyDtoToEntity(OrderBookDTO orderBookDTO, OrderBook orderBookEntity) {
         var book = bookRepository.findById(orderBookDTO.bookId())
-                .orElseThrow(() ->new BookNotFoundException("Livro não encontrado"));
+                .orElseThrow(() ->new ResourceNotFoundException("Livro não encontrado"));
         orderBookEntity.setBook(book);
         orderBookEntity.setSoldValue(orderBookDTO.soldValue());
         orderBookEntity.setQuantity(orderBookDTO.quantity());
