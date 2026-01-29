@@ -53,7 +53,7 @@ public class Client {
         return orders;
     }
 
-    public void setOrders(BuyOrder order) {
+    public void addOrder(BuyOrder order) {
         this.orders.add(order);
     }
 
