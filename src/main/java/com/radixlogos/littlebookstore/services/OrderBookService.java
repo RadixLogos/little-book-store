@@ -59,12 +59,19 @@ public class OrderBookService {
     }
 
     private void copyDtoToEntity(OrderBookDTO orderBookDTO, OrderBook orderBookEntity) {
-        var book = bookRepository.findById(orderBookDTO.bookId())
-                .orElseThrow(() ->new ResourceNotFoundException("Livro não encontrado"));
+        if(!bookRepository.existsById(orderBookDTO.id())){
+            throw new ResourceNotFoundException("Livro não encontrado");
+        }
+        var book = bookRepository.getReferenceById(orderBookDTO.book().id());
+
         orderBookEntity.setBook(book);
         orderBookEntity.setSoldValue(orderBookDTO.soldValue());
         orderBookEntity.setQuantity(orderBookDTO.quantity());
         orderBookEntity.setSubTotal(getSubtotal(orderBookEntity));
+
+        //Update the book stock
+        book.setStockQuantity(book.getStockQuantity() - orderBookDTO.quantity());
+        bookRepository.save(book);
     }
 
     /**The method returns OrderBook subtotal**/

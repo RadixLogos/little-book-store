@@ -1,10 +1,12 @@
 package com.radixlogos.littlebookstore.services;
 
+import com.radixlogos.littlebookstore.dto.BookDTO;
 import com.radixlogos.littlebookstore.dto.BuyOrderDTO;
 import com.radixlogos.littlebookstore.dto.OrderBookDTO;
 import com.radixlogos.littlebookstore.entities.BuyOrder;
 import com.radixlogos.littlebookstore.entities.OrderBook;
 import com.radixlogos.littlebookstore.entities.enums.PaymentType;
+import com.radixlogos.littlebookstore.repositories.BookRepository;
 import com.radixlogos.littlebookstore.repositories.BuyOrderRepository;
 import com.radixlogos.littlebookstore.repositories.ClientRepository;
 import com.radixlogos.littlebookstore.repositories.OrderBookRepository;
@@ -24,6 +26,8 @@ public class BuyOrderService {
     private OrderBookRepository orderBookRepository;
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private BookRepository bookRepository;
 
     @Transactional(readOnly = true)
     public Page<BuyOrderDTO> findAllBuyOrders(Pageable pageable){
@@ -64,7 +68,7 @@ public class BuyOrderService {
         }
     }
     private void copyDtoToEntity(BuyOrderDTO buyOrderDTO, BuyOrder buyOrderEntity) {
-        var client = clientRepository.findById(buyOrderDTO.id())
+        var client = clientRepository.findById(buyOrderDTO.client().id())
                 .orElseThrow(()-> new ResourceNotFoundException("Cliente não encontrado"));
         buyOrderEntity.setClient(client);
         buyOrderEntity.setOrderDate(buyOrderDTO.orderDate());
@@ -80,5 +84,6 @@ public class BuyOrderService {
             buyOrderEntity.addOrderBooks(orderBookEntity);
         };
         buyOrderEntity.setTotal(total);
+
     }
 }
