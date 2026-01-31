@@ -1,6 +1,7 @@
 package com.radixlogos.littlebookstore.services;
 
 import com.radixlogos.littlebookstore.dto.OrderBookDTO;
+import com.radixlogos.littlebookstore.entities.Book;
 import com.radixlogos.littlebookstore.entities.OrderBook;
 import com.radixlogos.littlebookstore.repositories.BookRepository;
 import com.radixlogos.littlebookstore.repositories.OrderBookRepository;
@@ -33,7 +34,9 @@ public class OrderBookService {
     @Transactional
     public OrderBookDTO insertOrderBook(OrderBookDTO orderBookDTO){
         var orderBookEntity = new OrderBook();
-        copyDtoToEntity(orderBookDTO,orderBookEntity);
+        var book = bookRepository.findById(orderBookDTO.book().id())
+                .orElseThrow(()-> new ResourceNotFoundException("Livro não encontrado"));
+        copyDtoToEntity(orderBookDTO,orderBookEntity,book);
         orderBookEntity = orderBookRepository.save(orderBookEntity);
        return OrderBookDTO.fromOrderBook(orderBookEntity);
     }
@@ -42,7 +45,11 @@ public class OrderBookService {
         var orderBookEntity = orderBookRepository.getReferenceById(orderBookId);
         if(orderBookEntity.getId() == null)
             throw new ResourceNotFoundException("Pedido não encontrado");
-        copyDtoToEntity(orderBookDTO,orderBookEntity);
+        if(!bookRepository.existsById(orderBookDTO.book().id())){
+            throw new ResourceNotFoundException("Livro não encontrado");
+        }
+        var book = bookRepository.getReferenceById(orderBookDTO.book().id());
+        copyDtoToEntity(orderBookDTO,orderBookEntity,book);
         orderBookEntity = orderBookRepository.save(orderBookEntity);
         return OrderBookDTO.fromOrderBook(orderBookEntity);
     }
@@ -58,19 +65,15 @@ public class OrderBookService {
         }
     }
 
-    private void copyDtoToEntity(OrderBookDTO orderBookDTO, OrderBook orderBookEntity) {
-        if(!bookRepository.existsById(orderBookDTO.id())){
-            throw new ResourceNotFoundException("Livro não encontrado");
-        }
-        var book = bookRepository.getReferenceById(orderBookDTO.book().id());
-
+    private void copyDtoToEntity(OrderBookDTO orderBookDTO, OrderBook orderBookEntity, Book book) {
         orderBookEntity.setBook(book);
         orderBookEntity.setSoldValue(orderBookDTO.soldValue());
         orderBookEntity.setQuantity(orderBookDTO.quantity());
         orderBookEntity.setSubTotal(getSubtotal(orderBookEntity));
 
-        //Update the book stock
+        //Update the book
         book.setStockQuantity(book.getStockQuantity() - orderBookDTO.quantity());
+        book.addOrderBook(orderBookEntity);
         bookRepository.save(book);
     }
 

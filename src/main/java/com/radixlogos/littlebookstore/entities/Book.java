@@ -16,7 +16,8 @@ public class Book {
     private String editor;
     private Integer stockQuantity;
     private Double price;
-
+    @OneToMany(mappedBy = "book")
+    private Set<OrderBook> orderBooks = new HashSet<>();
     public Book() {
     }
 
@@ -65,6 +66,22 @@ public class Book {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public Set<OrderBook> getOrderBooks() {
+        return orderBooks;
+    }
+
+    public void addOrderBook(OrderBook orderBook) {
+        this.orderBooks.add(orderBook);
     }
 
     @Override
