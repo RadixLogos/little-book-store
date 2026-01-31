@@ -26,7 +26,7 @@ public class OrderBookService {
         return response.map(OrderBookDTO::fromOrderBook);
     }
     @Transactional(readOnly = true)
-    public OrderBookDTO findOrderById(Long orderId){
+    public OrderBookDTO findOrderBookById(Long orderId){
         var response = orderBookRepository.findById(orderId)
                 .orElseThrow(()-> new ResourceNotFoundException("Pedido não encontrado"));
         return OrderBookDTO.fromOrderBook(response);
