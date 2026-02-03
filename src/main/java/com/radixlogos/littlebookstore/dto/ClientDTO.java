@@ -12,13 +12,9 @@ public record ClientDTO(
         @NotBlank(message = "The name is required")
         String name,
         @NotBlank(message = "The cellphone is required")
-        String cellphone,
-        List<BuyOrderDTO> orders) {
+        String cellphone)
+        {
     public static ClientDTO fromClient(Client client) {
-        var orders = new ArrayList<BuyOrderDTO>();
-        client.getOrders().forEach(bo ->{
-            orders.add(BuyOrderDTO.fromBuyOrder(bo));
-        });
-        return new ClientDTO(client.getId(), client.getName(), client.getCellphone(),orders);
+        return new ClientDTO(client.getId(), client.getName(), client.getCellphone());
     }
 }

@@ -1,8 +1,6 @@
 package com.radixlogos.littlebookstore.services;
 
-import com.radixlogos.littlebookstore.dto.BuyOrderDTO;
 import com.radixlogos.littlebookstore.dto.ClientDTO;
-import com.radixlogos.littlebookstore.entities.BuyOrder;
 import com.radixlogos.littlebookstore.entities.Client;
 import com.radixlogos.littlebookstore.repositories.ClientRepository;
 import com.radixlogos.littlebookstore.services.exceptions.DatabaseException;
@@ -61,14 +59,5 @@ public class ClientService {
     private void copyDtoToEntity(ClientDTO clientDTO, Client clientEntity) {
         clientEntity.setName(clientDTO.name());
         clientEntity.setCellphone(clientDTO.cellphone());
-        for(BuyOrderDTO bo : clientDTO.orders()){
-            var buyOrder = new BuyOrder();
-            buyOrder.setClient(clientEntity);
-            buyOrder.setId(bo.id());
-            buyOrder.setPaymentType(bo.paymentType());
-            buyOrder.setOrderDate(bo.orderDate());
-            buyOrder.setTotal(bo.total());
-            clientEntity.addOrder(buyOrder);
-        }
     }
 }

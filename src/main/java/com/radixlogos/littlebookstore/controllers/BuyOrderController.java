@@ -1,7 +1,7 @@
 package com.radixlogos.littlebookstore.controllers;
 
-import com.radixlogos.littlebookstore.dto.OrderBookDTO;
-import com.radixlogos.littlebookstore.services.OrderBookService;
+import com.radixlogos.littlebookstore.dto.BuyOrderDTO;
+import com.radixlogos.littlebookstore.services.BuyOrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,42 +13,42 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/order-books")
-public class OrderBookController {
+@RequestMapping("/buy-orders")
+public class BuyOrderController {
     @Autowired
-    private OrderBookService service;
+    private BuyOrderService service;
 
     @GetMapping
-    public ResponseEntity<Page<OrderBookDTO>> findAll(Pageable pageable){
-        var response = service.findAllOrderBooks(pageable);
+    public ResponseEntity<Page<BuyOrderDTO>> findAll(Pageable pageable){
+        var response = service.findAllBuyOrders(pageable);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<OrderBookDTO> getOrderBook(@PathVariable Long id){
-        var response = service.findOrderBookById(id);
+    public ResponseEntity<BuyOrderDTO> getBuyOrder(@PathVariable Long id){
+        var response = service.findOrderById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
-    public ResponseEntity<OrderBookDTO> insertOrderBook(@Valid @RequestBody OrderBookDTO orderBookDTO){
-        var response = service.insertOrderBook(orderBookDTO);
+    public ResponseEntity<BuyOrderDTO> insertBuyOrder(@Valid @RequestBody BuyOrderDTO buyOrderDTO){
+        var response = service.insertBuyOrder(buyOrderDTO);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
-                .path("{id}")
+                .path("/{id}")
                 .buildAndExpand(response.id())
                 .toUri();
         return ResponseEntity.created(uri).body(response);
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<OrderBookDTO> updateOrderBook(
+        public ResponseEntity<BuyOrderDTO> updateBuyOrder(
                 @PathVariable Long id,
-                @Valid @RequestBody OrderBookDTO orderBookDTO){
-        var response = service.updateOrderBook(id,orderBookDTO);
+                @Valid @RequestBody BuyOrderDTO buyOrderDTO){
+        var response = service.updateBuyOrder(id, buyOrderDTO);
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderBook(@PathVariable Long id){
-        service.deleteOrderBook(id);
+    public ResponseEntity<Void> deleteBuyOrder(@PathVariable Long id){
+        service.deleteBuyOrder(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -16,7 +16,7 @@ public class Book {
     private String editor;
     private Integer stockQuantity;
     private Double price;
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private Set<OrderBook> orderBooks = new HashSet<>();
     public Book() {
     }

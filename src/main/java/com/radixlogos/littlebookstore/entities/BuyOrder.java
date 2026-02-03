@@ -14,15 +14,13 @@ public class BuyOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
     private Double total;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private LocalDate orderDate;
     @ManyToOne
     private Client client;
-    @OneToMany(mappedBy = "buyOrder")
+    @OneToMany(mappedBy = "buyOrder", cascade = CascadeType.ALL)
     private Set<OrderBook> orderBooks = new HashSet<>();
 
     public BuyOrder(Client client, PaymentType paymentType, Double total) {

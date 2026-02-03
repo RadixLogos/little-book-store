@@ -8,7 +8,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 public record OrderBookDTO(
         Long id,
-        Long buyOrderId,
         @Positive(message = "Quantity can't be less then 1")
         Integer quantity,
         @PositiveOrZero(message = "Must be positive or zero")
@@ -18,10 +17,7 @@ public record OrderBookDTO(
         Double subtotal) {
     public static OrderBookDTO fromOrderBook(OrderBook orderBook){
         var bookDto = BookDTO.fromBook(orderBook.getBook());
-        Long buyOrderId = null;
-        if(orderBook.getBuyOrder() != null ){
-            buyOrderId = orderBook.getBuyOrder().getId();
-        }
-        return new OrderBookDTO(orderBook.getId(), buyOrderId, orderBook.getQuantity(), orderBook.getSoldValue(), bookDto, orderBook.getSubTotal());
+
+        return new OrderBookDTO(orderBook.getId(),orderBook.getQuantity(), orderBook.getSoldValue(), bookDto, orderBook.getSubTotal());
     }
 }

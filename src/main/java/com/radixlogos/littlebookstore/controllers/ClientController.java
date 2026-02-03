@@ -1,7 +1,7 @@
 package com.radixlogos.littlebookstore.controllers;
 
-import com.radixlogos.littlebookstore.dto.BookDTO;
-import com.radixlogos.littlebookstore.services.BookService;
+import com.radixlogos.littlebookstore.dto.ClientDTO;
+import com.radixlogos.littlebookstore.services.ClientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,26 +13,26 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/books")
-public class BookController {
+@RequestMapping("/clients")
+public class ClientController {
     @Autowired
-    private BookService service;
+    private ClientService service;
 
     @GetMapping
-    public ResponseEntity<Page<BookDTO>> findAll(
+    public ResponseEntity<Page<ClientDTO>> findAll(
             Pageable pageable,
             @RequestParam(defaultValue = "") String name){
-        var response = service.findAllBooks(pageable,name);
+        var response = service.findAllClients(pageable,name);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> getBook(@PathVariable Long id){
-        var response = service.findBookById(id);
+    public ResponseEntity<ClientDTO> getClient(@PathVariable Long id){
+        var response = service.findClientById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
-    public ResponseEntity<BookDTO> insertBook(@Valid @RequestBody BookDTO bookDTO){
-        var response = service.insertBook(bookDTO);
+    public ResponseEntity<ClientDTO> insertClient(@Valid @RequestBody ClientDTO clientDTO){
+        var response = service.insertClient(clientDTO);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -42,15 +42,15 @@ public class BookController {
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<BookDTO> updateBook(
+        public ResponseEntity<ClientDTO> updateClient(
                 @PathVariable Long id,
-                @Valid @RequestBody BookDTO bookDTO){
-        var response = service.updateBook(id,bookDTO);
+                @Valid @RequestBody ClientDTO clientDTO){
+        var response = service.updateClient(id,clientDTO);
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id){
-        service.deleteBook(id);
+    public ResponseEntity<Void> deleteClient(@PathVariable Long id){
+        service.deleteClient(id);
         return ResponseEntity.noContent().build();
     }
 }
