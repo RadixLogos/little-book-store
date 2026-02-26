@@ -54,5 +54,12 @@ public class BuyOrderController {
         service.deleteBuyOrder(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{buyOrderId}/{orderBookId}")
+    public ResponseEntity<Void> deleteOrderBook(@PathVariable Long buyOrderId,@PathVariable Long orderBookId){
+        service.deleteOrderBook(buyOrderId,orderBookId);
+        return ResponseEntity.noContent().build();
+
+    }
 }
 

@@ -68,6 +68,23 @@ public class BuyOrderService {
             throw new DatabaseException("Falha de integridade referencial");
         }
     }
+    @Transactional
+    public void deleteOrderBook(Long buyOrderId,Long orderBookId){
+        if(!orderBookRepository.existsById(orderBookId)){
+            throw new ResourceNotFoundException("Pedido não encontrado");
+        }
+        try {
+            var buyOrder = buyOrderRepository.getReferenceById(buyOrderId);
+            var orderBook = orderBookRepository.getReferenceById(orderBookId);
+            buyOrder.setTotal(buyOrder.getTotal()- orderBook.getSubTotal());
+            buyOrderRepository.save(buyOrder);
+            orderBookRepository.deleteById(orderBookId);
+
+        }catch (Exception e){
+            throw new DatabaseException("Falha de integridade referencial");
+        }
+    }
+
     /**This method includes insertion and updating with a logic to handle each case
     * The size variable intends to give a reference to distinguish when to create or just update the order book**/
     private void copyBuyOrderDtoToBuyOrderEntity(BuyOrderDTO buyOrderDTO, BuyOrder buyOrderEntity) {
@@ -77,23 +94,18 @@ public class BuyOrderService {
         buyOrderEntity.setPaymentType(buyOrderDTO.paymentType());
 
         Double total = 0.0;
-        int  size = buyOrderEntity.getOrderBooks().size();
             for (OrderBookDTO obDto : buyOrderDTO.orderBooks()) {
                 var orderBookEntity = new OrderBook();
 
-                if(size == 0){
+                if(obDto.id() == null){
                     orderBookEntity = createOrderBook(obDto);
                     total += orderBookEntity.getSubTotal();
                     orderBookEntity.setBuyOrder(buyOrderEntity);
                     buyOrderEntity.addOrderBooks(orderBookEntity);
                 }
                 else{
-                    for(OrderBook obEntity : buyOrderEntity.getOrderBooks()){
-                        orderBookEntity = updateOrderBook(obEntity,obDto);
-                        total += orderBookEntity.getSubTotal();
-                        size--;
-                    }
-
+                    orderBookEntity = updateOrderBook(orderBookRepository.getReferenceById(obDto.id()),obDto);
+                    total += orderBookEntity.getSubTotal();
                 }
 
             }
@@ -119,7 +131,8 @@ public class BuyOrderService {
 
     private OrderBook updateOrderBook(OrderBook obEntity,OrderBookDTO orderBookDTO){
         var book = findBook(orderBookDTO.book().id());
-        manageStock(book,orderBookDTO.quantity());
+        int updateQuantity = (orderBookDTO.quantity()<obEntity.getQuantity()) ? - orderBookDTO.quantity(): orderBookDTO.quantity();
+        manageStock(book,updateQuantity);
         obEntity.setQuantity(orderBookDTO.quantity());
         obEntity.setBook(book);
         obEntity.setSoldValue(orderBookDTO.soldValue());
