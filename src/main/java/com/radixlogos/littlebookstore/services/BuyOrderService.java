@@ -31,8 +31,8 @@ public class BuyOrderService {
     @Autowired
     private OrderBookRepository orderBookRepository;
     @Transactional(readOnly = true)
-    public Page<BuyOrderDTO> findAllBuyOrders(Pageable pageable){
-        return buyOrderRepository.findAllPaged(pageable).map(BuyOrderDTO::fromBuyOrder);
+    public Page<BuyOrderDTO> findAllBuyOrders(Pageable pageable, String clientName,String bookName){
+        return buyOrderRepository.findAllPaged(pageable,clientName,bookName).map(BuyOrderDTO::fromBuyOrder);
     }
     @Transactional(readOnly = true)
     public BuyOrderDTO findOrderById(Long buyOrderId){

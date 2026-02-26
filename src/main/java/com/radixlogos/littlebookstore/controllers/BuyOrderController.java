@@ -19,8 +19,11 @@ public class BuyOrderController {
     private BuyOrderService service;
 
     @GetMapping
-    public ResponseEntity<Page<BuyOrderDTO>> findAll(Pageable pageable){
-        var response = service.findAllBuyOrders(pageable);
+    public ResponseEntity<Page<BuyOrderDTO>> findAll(
+            Pageable pageable,
+            @RequestParam(defaultValue = "") String clientName,
+            @RequestParam(defaultValue = "") String bookName){
+        var response = service.findAllBuyOrders(pageable,clientName,bookName);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
