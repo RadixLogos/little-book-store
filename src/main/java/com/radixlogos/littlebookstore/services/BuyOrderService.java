@@ -106,12 +106,14 @@ public class BuyOrderService {
         var orderBook = new OrderBook();
         orderBook.setBook(book);
         orderBook.setQuantity(orderBookDTO.quantity());
+        orderBook.setDiscount((orderBookDTO.discount() == null) ? 0 : orderBookDTO.discount());
+        orderBook.setSoldValue((orderBookDTO.soldValue() == null) ? book.getPrice() : orderBookDTO.soldValue());
         if(orderBookDTO.soldValue() == null){
             orderBook.setSoldValue(book.getPrice());
         }else{
             orderBook.setSoldValue(orderBookDTO.soldValue());
         }
-        orderBook.setSubTotal(calculateOrderBookSubtotal(orderBook.getSoldValue(),orderBook.getQuantity()));
+        orderBook.setSubTotal(calculateOrderBookSubtotal(orderBook.getSoldValue(),orderBook.getQuantity(),orderBook.getDiscount()));
         return orderBook;
     }
 
@@ -121,7 +123,7 @@ public class BuyOrderService {
         obEntity.setQuantity(orderBookDTO.quantity());
         obEntity.setBook(book);
         obEntity.setSoldValue(orderBookDTO.soldValue());
-        obEntity.setSubTotal(calculateOrderBookSubtotal(obEntity.getSoldValue(),obEntity.getQuantity()));
+        obEntity.setSubTotal(calculateOrderBookSubtotal(obEntity.getSoldValue(),obEntity.getQuantity(),obEntity.getDiscount()));
         return obEntity;
     }
     private Book findBook(Long id){
@@ -134,8 +136,10 @@ public class BuyOrderService {
                 .orElseThrow(()-> new ResourceNotFoundException("Cliente não encontrado"));
     }
     /**The method returns OrderBook subtotal**/
-    private Double calculateOrderBookSubtotal(Double soldValue, Integer quantity){
-        return soldValue*quantity;
+    private Double calculateOrderBookSubtotal(Double soldValue, Integer quantity, Double discount){
+        double value = soldValue*quantity;
+        if (discount != 0 ) value -= value*(discount/100);
+        return value;
     }
     /**The method verify with there are books available and when there are it decreases or increases the amount in stock**/
     private void manageStock(Book book, int requestedQuantity){

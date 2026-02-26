@@ -13,6 +13,7 @@ public class OrderBook {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer quantity;
+    private Double discount;
     private Double soldValue;
     private Double subTotal;
     @ManyToOne
@@ -37,6 +38,14 @@ public class OrderBook {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
     }
 
     public Double getSoldValue() {
