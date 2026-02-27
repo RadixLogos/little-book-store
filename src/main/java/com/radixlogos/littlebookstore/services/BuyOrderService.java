@@ -77,6 +77,7 @@ public class BuyOrderService {
             var buyOrder = buyOrderRepository.getReferenceById(buyOrderId);
             var orderBook = orderBookRepository.getReferenceById(orderBookId);
             buyOrder.setTotal(buyOrder.getTotal()- orderBook.getSubTotal());
+            manageStock(orderBook.getBook(),- orderBook.getQuantity());
             buyOrderRepository.save(buyOrder);
             orderBookRepository.deleteById(orderBookId);
 

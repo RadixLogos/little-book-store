@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client,Long> {
-    @Query("SELECT obj FROM Client obj WHERE UPPER(obj.name) LIKE UPPER(CONCAT(:name,'%'))")
-    public Page<Client> findAllClients(Pageable pageable, String name);
+    @Query("SELECT obj FROM Client obj WHERE UPPER(obj.name) LIKE UPPER(CONCAT(:name,'%')) AND obj.cellphone LIKE CONCAT(:cellphone,'%')")
+    public Page<Client> findAllClients(Pageable pageable, String name, String cellphone);
 }

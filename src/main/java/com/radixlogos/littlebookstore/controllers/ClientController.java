@@ -21,8 +21,9 @@ public class ClientController {
     @GetMapping
     public ResponseEntity<Page<ClientDTO>> findAll(
             Pageable pageable,
-            @RequestParam(defaultValue = "") String name){
-        var response = service.findAllClients(pageable,name);
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "") String cellphone){
+        var response = service.findAllClients(pageable,name, cellphone);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
