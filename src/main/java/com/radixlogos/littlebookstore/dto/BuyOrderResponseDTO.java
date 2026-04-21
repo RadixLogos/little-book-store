@@ -2,7 +2,11 @@ package com.radixlogos.littlebookstore.dto;
 
 import com.radixlogos.littlebookstore.entities.BuyOrder;
 import com.radixlogos.littlebookstore.entities.enums.PaymentType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

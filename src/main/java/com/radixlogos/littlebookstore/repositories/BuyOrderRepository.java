@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BuyOrderRepository extends JpaRepository<BuyOrder,Long> {
-    @Query(value = "SELECT obj FROM BuyOrder obj JOIN FETCH obj.orderBooks",
+    @Query(value = "SELECT obj FROM BuyOrder obj JOIN FETCH obj.orderBooks ob JOIN ob.book b JOIN obj.client c WHERE UPPER(c.name) " +
+            "LIKE UPPER(CONCAT(:clientName,'%')) AND UPPER(b.name) LIKE UPPER(CONCAT(:bookNAme,'%'))",
             countQuery = "SELECT COUNT (DISTINCT obj) FROM BuyOrder obj JOIN obj.orderBooks")
-    public Page<BuyOrder> findAllPaged(Pageable pageable);
+    public Page<BuyOrder> findAllPaged(Pageable pageable,String clientName, String bookNAme);
 }

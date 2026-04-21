@@ -17,8 +17,8 @@ public class ClientService {
     private ClientRepository clientRepository;
 
     @Transactional
-    public Page<ClientDTO> findAllClients(Pageable pageable, String name){
-        return clientRepository.findAllClients(pageable,name).map(ClientDTO::fromClient);
+    public Page<ClientDTO> findAllClients(Pageable pageable, String name, String cellphone){
+        return clientRepository.findAllClients(pageable,name, cellphone).map(ClientDTO::fromClient);
     }
 
     @Transactional
