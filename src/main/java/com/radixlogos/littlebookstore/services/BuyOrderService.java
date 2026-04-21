@@ -1,6 +1,7 @@
 package com.radixlogos.littlebookstore.services;
 
-import com.radixlogos.littlebookstore.dto.BuyOrderDTO;
+import com.radixlogos.littlebookstore.dto.BuyOrderRequestDTO;
+import com.radixlogos.littlebookstore.dto.BuyOrderResponseDTO;
 import com.radixlogos.littlebookstore.dto.OrderBookDTO;
 import com.radixlogos.littlebookstore.entities.Book;
 import com.radixlogos.littlebookstore.entities.BuyOrder;
@@ -28,31 +29,31 @@ public class BuyOrderService {
     private BookRepository bookRepository;
 
     @Transactional(readOnly = true)
-    public Page<BuyOrderDTO> findAllBuyOrders(Pageable pageable){
-        return buyOrderRepository.findAllPaged(pageable).map(BuyOrderDTO::fromBuyOrder);
+    public Page<BuyOrderResponseDTO> findAllBuyOrders(Pageable pageable){
+        return buyOrderRepository.findAllPaged(pageable).map(BuyOrderResponseDTO::fromBuyOrder);
     }
     @Transactional(readOnly = true)
-    public BuyOrderDTO findOrderById(Long buyOrderId){
-        return BuyOrderDTO
+    public BuyOrderResponseDTO findOrderById(Long buyOrderId){
+        return BuyOrderResponseDTO
                 .fromBuyOrder(buyOrderRepository.findById(buyOrderId)
                         .orElseThrow(()-> new ResourceNotFoundException("Pedido não encontrado")));
     }
     @Transactional
-    public BuyOrderDTO insertBuyOrder(BuyOrderDTO buyOrderDTO){
+    public BuyOrderRequestDTO insertBuyOrder(BuyOrderRequestDTO  buyOrderDTO){
         var buyOrderEntity = new BuyOrder();
         copyDtoToEntity(buyOrderDTO,buyOrderEntity);
         buyOrderEntity = buyOrderRepository.save(buyOrderEntity);
-        return BuyOrderDTO.fromBuyOrder(buyOrderEntity);
+        return BuyOrderRequestDTO.entityToDTO(buyOrderEntity);
     }
     @Transactional
-    public BuyOrderDTO updateBuyOrder(Long id, BuyOrderDTO buyOrderDTO){
+    public BuyOrderRequestDTO updateBuyOrder(Long id, BuyOrderRequestDTO buyOrderDTO){
         if (!buyOrderRepository.existsById(id)){
             throw new ResourceNotFoundException("Pedido não encontrado");
         }
         var buyOrderEntity = buyOrderRepository.getReferenceById(id);
         copyDtoToEntity(buyOrderDTO,buyOrderEntity);
         buyOrderEntity = buyOrderRepository.save(buyOrderEntity);
-        return BuyOrderDTO.fromBuyOrder(buyOrderEntity);
+        return BuyOrderRequestDTO.entityToDTO(buyOrderEntity);
     }
     @Transactional(propagation = Propagation.SUPPORTS)
     public void deleteBuyOrder(Long id){
@@ -65,16 +66,16 @@ public class BuyOrderService {
             throw new DatabaseException("Falha de integridade referencial");
         }
     }
-    private void copyDtoToEntity(BuyOrderDTO buyOrderDTO, BuyOrder buyOrderEntity) {
-        var client = clientRepository.findById(buyOrderDTO.client().id())
+    private void copyDtoToEntity(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity) {
+        var client = clientRepository.findById(buyOrderDTO.client())
                 .orElseThrow(()-> new ResourceNotFoundException("Cliente não encontrado"));
         buyOrderEntity.setClient(client);
         buyOrderEntity.setOrderDate(buyOrderDTO.orderDate());
         buyOrderEntity.setPaymentType(buyOrderDTO.paymentType());
 
         Double total = 0.0;
-        for(OrderBookDTO ob : buyOrderDTO.orderBooks()){
-            var orderBookEntity = createOrderBook(ob,buyOrderEntity);
+        for(OrderBookDTO orderBookDTO : buyOrderDTO.orderBooks()){
+            var orderBookEntity = createOrderBook(orderBookDTO,buyOrderEntity);
             total += orderBookEntity.getSubTotal();
             buyOrderEntity.addOrderBooks(orderBookEntity);
         };
@@ -82,12 +83,12 @@ public class BuyOrderService {
 
     }
     private OrderBook createOrderBook(OrderBookDTO orderBookDTO, BuyOrder buyOrderEntity){
-        var book = findBook(orderBookDTO.book().id());
+        var book = findBook(orderBookDTO.bookId());
         manageStock(book,orderBookDTO.quantity());
         var orderBook = new OrderBook();
         orderBook.setBook(book);
         orderBook.setQuantity(orderBookDTO.quantity());
-        orderBook.setSoldValue(orderBookDTO.soldValue());
+        orderBook.setSoldValue(book.getPrice());
         orderBook.setSubTotal(calculateOrderBookSubtotal(orderBookDTO.soldValue(),orderBookDTO.quantity()));
         orderBook.setBuyOrder(buyOrderEntity);
         return orderBook;

@@ -16,6 +16,7 @@ public class Book {
     private String editor;
     private Integer stockQuantity;
     private Double price;
+    private String imgUrl;
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private Set<OrderBook> orderBooks = new HashSet<>();
     public Book() {
@@ -83,6 +84,16 @@ public class Book {
     public void addOrderBook(OrderBook orderBook) {
         this.orderBooks.add(orderBook);
     }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

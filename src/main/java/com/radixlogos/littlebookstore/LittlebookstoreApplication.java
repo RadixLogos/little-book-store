@@ -1,5 +1,6 @@
 package com.radixlogos.littlebookstore;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,4 +11,8 @@ public class LittlebookstoreApplication {
 		SpringApplication.run(LittlebookstoreApplication.class, args);
 	}
 
+	@PostConstruct
+	public void test() {
+
+	}
 }

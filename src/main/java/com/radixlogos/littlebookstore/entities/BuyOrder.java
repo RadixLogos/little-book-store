@@ -18,6 +18,8 @@ public class BuyOrder {
     private Double total;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private LocalDate orderDate;
+
+    private String receiptUrl;
     @ManyToOne
     private Client client;
     @OneToMany(mappedBy = "buyOrder", cascade = CascadeType.ALL)
@@ -76,8 +78,16 @@ public class BuyOrder {
         return orderBooks;
     }
 
-    public void addOrderBooks(OrderBook orderBooks) {
-        this.orderBooks.add(orderBooks);
+    public void addOrderBooks(OrderBook orderBook) {
+        this.orderBooks.add(orderBook);
+    }
+
+    public String getReceiptUrl() {
+        return receiptUrl;
+    }
+
+    public void setReceiptUrl(String receiptUrl) {
+        this.receiptUrl = receiptUrl;
     }
 
     @Override

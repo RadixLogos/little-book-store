@@ -66,5 +66,6 @@ public class BookService {
         book.setEditor(bookDTO.editor());
         book.setPrice(bookDTO.price());
         book.setStockQuantity(bookDTO.stockQuantity());
+        book.setImgUrl(bookDTO.imgUrl());
     }
 }

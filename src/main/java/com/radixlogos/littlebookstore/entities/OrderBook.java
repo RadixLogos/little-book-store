@@ -75,6 +75,9 @@ public class OrderBook {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         OrderBook orderBook = (OrderBook) o;
+        if (id == null || orderBook.id == null) {
+            return false;
+        }
         return Objects.equals(id, orderBook.id);
     }
 

@@ -14,9 +14,11 @@ public record BookDTO(Long id,
                       Double price,
                       @NotBlank(message = "Must inform the stock")
                       @PositiveOrZero(message = "The value must be positive or zero")
-                      Integer stockQuantity) {
+                      Integer stockQuantity,
+                      String imgUrl
+                      ) {
 
     public static BookDTO fromBook(Book book){
-        return new BookDTO(book.getId(), book.getName(), book.getEditor(), book.getPrice(), book.getStockQuantity());
+        return new BookDTO(book.getId(), book.getName(), book.getEditor(), book.getPrice(), book.getStockQuantity(), book.getImgUrl());
     }
 }

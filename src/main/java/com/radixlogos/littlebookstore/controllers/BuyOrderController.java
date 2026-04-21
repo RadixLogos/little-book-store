@@ -1,6 +1,7 @@
 package com.radixlogos.littlebookstore.controllers;
 
-import com.radixlogos.littlebookstore.dto.BuyOrderDTO;
+import com.radixlogos.littlebookstore.dto.BuyOrderRequestDTO;
+import com.radixlogos.littlebookstore.dto.BuyOrderResponseDTO;
 import com.radixlogos.littlebookstore.services.BuyOrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +20,17 @@ public class BuyOrderController {
     private BuyOrderService service;
 
     @GetMapping
-    public ResponseEntity<Page<BuyOrderDTO>> findAll(Pageable pageable){
+    public ResponseEntity<Page<BuyOrderResponseDTO>> findAll(Pageable pageable){
         var response = service.findAllBuyOrders(pageable);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<BuyOrderDTO> getBuyOrder(@PathVariable Long id){
+    public ResponseEntity<BuyOrderResponseDTO> getBuyOrder(@PathVariable Long id){
         var response = service.findOrderById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
-    public ResponseEntity<BuyOrderDTO> insertBuyOrder(@Valid @RequestBody BuyOrderDTO buyOrderDTO){
+    public ResponseEntity<BuyOrderRequestDTO> insertBuyOrder(@Valid @RequestBody BuyOrderRequestDTO buyOrderDTO){
         var response = service.insertBuyOrder(buyOrderDTO);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -40,9 +41,9 @@ public class BuyOrderController {
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<BuyOrderDTO> updateBuyOrder(
+        public ResponseEntity<BuyOrderRequestDTO> updateBuyOrder(
                 @PathVariable Long id,
-                @Valid @RequestBody BuyOrderDTO buyOrderDTO){
+                @Valid @RequestBody BuyOrderRequestDTO buyOrderDTO){
         var response = service.updateBuyOrder(id, buyOrderDTO);
         return ResponseEntity.ok().body(response);
     }

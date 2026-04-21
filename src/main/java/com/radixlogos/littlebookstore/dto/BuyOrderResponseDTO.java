@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public record BuyOrderDTO(
+public record BuyOrderResponseDTO(
         Long id,
         @NotNull(message = "Must inform the payment type")
         PaymentType paymentType,
@@ -19,12 +19,12 @@ public record BuyOrderDTO(
         @NotNull(message = "Must inform the books that were ordered")
         List<OrderBookDTO> orderBooks,
         Double total) {
-    public static BuyOrderDTO fromBuyOrder(BuyOrder buyOrder){
+    public static BuyOrderResponseDTO fromBuyOrder(BuyOrder buyOrder){
         var client = ClientDTO.fromClient(buyOrder.getClient());
         List<OrderBookDTO> orderBooks = new ArrayList<>();
         buyOrder.getOrderBooks().forEach(ob ->{
             orderBooks.add(OrderBookDTO.fromOrderBook(ob));
         });
-        return new BuyOrderDTO(buyOrder.getId(),buyOrder.getPaymentType(),client,buyOrder.getOrderDate(),orderBooks, buyOrder.getTotal());
+        return new BuyOrderResponseDTO(buyOrder.getId(),buyOrder.getPaymentType(),client,buyOrder.getOrderDate(),orderBooks, buyOrder.getTotal());
     }
 }
