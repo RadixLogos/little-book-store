@@ -1,6 +1,5 @@
 package com.radixlogos.littlebookstore.entities;
 
-import com.radixlogos.littlebookstore.entities.enums.PaymentType;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -14,7 +13,6 @@ public class BuyOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private PaymentType paymentType;
     private Double total;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private LocalDate orderDate;
@@ -25,9 +23,8 @@ public class BuyOrder {
     @OneToMany(mappedBy = "buyOrder", cascade = CascadeType.ALL)
     private Set<OrderBook> orderBooks = new HashSet<>();
 
-    public BuyOrder(Client client, PaymentType paymentType, Double total) {
+    public BuyOrder(Client client,  Double total) {
         this.client = client;
-        this.paymentType = paymentType;
         this.total = total;
     }
 
@@ -58,15 +55,7 @@ public class BuyOrder {
         this.orderDate = orderDate;
     }
 
-    public PaymentType getPaymentType() {
-        return paymentType;
-    }
-
-    public void setPaymentType(PaymentType paymentType) {
-        this.paymentType = paymentType;
-    }
-
-    public Double getTotal() {
+   public Double getTotal() {
         return total;
     }
 

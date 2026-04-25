@@ -12,7 +12,6 @@ public record ClientDTO(
         Long id,
         @NotEmpty(message = "The name is required")
         String name,
-        @NotBlank(message = "The cellphone is required")
         String cellphone)
         {
     public static ClientDTO fromClient(Client client) {

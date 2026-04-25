@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book,Long> {
-    @Query("SELECT obj FROM Book obj WHERE UPPER(obj.name) LIKE UPPER(CONCAT(:name,'%'))")
+    @Query("SELECT obj FROM Book obj WHERE UPPER(obj.name) LIKE UPPER(CONCAT(:name,'%')) ORDER BY obj.name")
     public Page<Book> findAllPaged(Pageable pageable, String name);
 }

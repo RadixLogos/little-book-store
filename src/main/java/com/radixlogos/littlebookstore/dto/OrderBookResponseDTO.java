@@ -5,11 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
-import java.util.List;
-
-public record OrderBookDTO(
+public record OrderBookResponseDTO(
         Long id,
-        String name,
         @Positive(message = "Quantity can't be less then 1")
         Integer quantity,
         @PositiveOrZero(message = "Must be positive or zero")
@@ -19,9 +16,9 @@ public record OrderBookDTO(
         @PositiveOrZero(message = "Must be positive or zero")
         Double soldValue,
         @NotNull(message = "It is necessary to inform the book that was sold")
-        Long bookId,
+        BookDTO book,
         Double subtotal) {
-    public static OrderBookDTO fromOrderBook(OrderBook orderBook){
-        return new OrderBookDTO(orderBook.getId(),orderBook.getBook().getName(),orderBook.getQuantity(),orderBook.getSoldValue(), orderBook.getPixValue(), orderBook.getMoneyValue(), orderBook.getId(), orderBook.getSubTotal());
+    public static OrderBookResponseDTO fromOrderBook(OrderBook orderBook){
+        return new OrderBookResponseDTO(orderBook.getId(),orderBook.getQuantity(),orderBook.getSoldValue(), orderBook.getPixValue(), orderBook.getMoneyValue(), BookDTO.fromBook(orderBook.getBook()), orderBook.getSubTotal());
     }
 }

@@ -68,11 +68,11 @@ public class BuyOrderService {
         }
     }
     private void copyDtoToEntity(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity) {
-        var client = clientRepository.findById(buyOrderDTO.client())
+        var client = clientRepository.findById(buyOrderDTO.clientId())
                 .orElseThrow(()-> new ResourceNotFoundException("Cliente não encontrado"));
         buyOrderEntity.setClient(client);
         buyOrderEntity.setOrderDate(buyOrderDTO.orderDate());
-        buyOrderEntity.setPaymentType(buyOrderDTO.paymentType());
+        buyOrderEntity.setReceiptUrl(buyOrderDTO.receiptUrl());
 
         Double total = 0.0;
         for(OrderBookDTO orderBookDTO : buyOrderDTO.orderBooks()){
@@ -89,7 +89,9 @@ public class BuyOrderService {
         var orderBook = new OrderBook();
         orderBook.setBook(book);
         orderBook.setQuantity(orderBookDTO.quantity());
-        orderBook.setSoldValue(book.getPrice());
+        orderBook.setPixValue(orderBookDTO.pixValue());
+        orderBook.setMoneyValue(orderBookDTO.moneyValue());
+        orderBook.setSoldValue(orderBook.getMoneyValue()+orderBook.getPixValue());
         orderBook.setSubTotal(calculateOrderBookSubtotal(orderBookDTO.soldValue(),orderBookDTO.quantity()));
         orderBook.setBuyOrder(buyOrderEntity);
         return orderBook;

@@ -14,6 +14,11 @@ public class Book {
     private Long id;
     @Column(unique = true)
     private String name;
+    private String author;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+    @ManyToMany(mappedBy = "books")
+    private Set<Genre> genres = new HashSet<>();
     private String editor;
     private Integer stockQuantity;
     private Double price;
@@ -94,7 +99,29 @@ public class Book {
         this.imgUrl = imgUrl;
     }
 
+    public String getAuthor() {
+        return author;
+    }
 
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
+    }
 
     @Override
     public boolean equals(Object o) {

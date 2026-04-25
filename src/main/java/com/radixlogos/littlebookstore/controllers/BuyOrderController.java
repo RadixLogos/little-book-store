@@ -34,6 +34,9 @@ public class BuyOrderController {
     }
     @PostMapping
     public ResponseEntity<BuyOrderRequestDTO> insertBuyOrder(@Valid @RequestBody BuyOrderRequestDTO buyOrderDTO){
+        System.out.println(buyOrderDTO.clientId());
+        System.out.println(buyOrderDTO.orderBooks().get(0).bookId());
+
         var response = service.insertBuyOrder(buyOrderDTO);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()

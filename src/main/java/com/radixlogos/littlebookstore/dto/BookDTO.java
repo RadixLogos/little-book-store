@@ -1,24 +1,33 @@
 package com.radixlogos.littlebookstore.dto;
 
 import com.radixlogos.littlebookstore.entities.Book;
+import com.radixlogos.littlebookstore.entities.Genre;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public record BookDTO(Long id,
                       @NotBlank(message = "Must inform the name")
                       String name,
                       @NotBlank(message = "Must inform the editor")
                       String editor,
-                      @NotBlank(message = "Must inform the price")
+                      String author,
+                      String description,
+                      List<Long> genreIds,
+                      @NotNull(message = "Must inform the price")
                       @PositiveOrZero(message = "The price must be a positive value")
                       Double price,
-                      @NotBlank(message = "Must inform the stock")
+                      @NotNull(message = "Must inform the stock")
                       @PositiveOrZero(message = "The value must be positive or zero")
                       Integer stockQuantity,
                       String imgUrl
                       ) {
 
     public static BookDTO fromBook(Book book){
-        return new BookDTO(book.getId(), book.getName(), book.getEditor(), book.getPrice(), book.getStockQuantity(), book.getImgUrl());
+      List<Long> genreIds = book.getGenres().stream().map(Genre::getId).toList();
+        return new BookDTO(book.getId(), book.getName(), book.getEditor(), book.getAuthor(), book.getDescription(),genreIds,book.getPrice(), book.getStockQuantity(), book.getImgUrl());
     }
 }

@@ -1,8 +1,11 @@
 package com.radixlogos.littlebookstore.services;
 
 import com.radixlogos.littlebookstore.dto.BookDTO;
+import com.radixlogos.littlebookstore.dto.GenreDTO;
 import com.radixlogos.littlebookstore.entities.Book;
+import com.radixlogos.littlebookstore.entities.Genre;
 import com.radixlogos.littlebookstore.repositories.BookRepository;
+import com.radixlogos.littlebookstore.repositories.GenreRepository;
 import com.radixlogos.littlebookstore.services.exceptions.DatabaseException;
 import com.radixlogos.littlebookstore.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookService {
     @Autowired
     private BookRepository bookRepository;
-
+    @Autowired
+    private GenreRepository genreRepository;
     @Transactional(readOnly = true)
     public Page<BookDTO> findAllBooks(Pageable pageable, String name){
         return bookRepository.findAllPaged(pageable, name).map(BookDTO::fromBook);
@@ -64,6 +68,16 @@ public class BookService {
     private void copyDTOToEntity(Book book, BookDTO bookDTO){
         book.setName(bookDTO.name());
         book.setEditor(bookDTO.editor());
+        book.setAuthor(bookDTO.author());
+        book.setDescription(bookDTO.description());
+        
+        for(Long gi : bookDTO.genreIds()){
+            Genre genre = new Genre();
+            if(genreRepository.existsById(gi)){
+                 genre = genreRepository.getReferenceById(gi);
+            }
+            book.addGenre(genre);
+        }
         book.setPrice(bookDTO.price());
         book.setStockQuantity(bookDTO.stockQuantity());
         book.setImgUrl(bookDTO.imgUrl());

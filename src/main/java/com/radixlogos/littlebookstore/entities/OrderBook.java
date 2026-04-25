@@ -2,9 +2,7 @@ package com.radixlogos.littlebookstore.entities;
 
 import jakarta.persistence.*;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "tb_order_book")
@@ -15,6 +13,9 @@ public class OrderBook {
     private Integer quantity;
     private Double soldValue;
     private Double subTotal;
+    private Double pixValue;
+    private Double moneyValue;
+
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
@@ -69,6 +70,22 @@ public class OrderBook {
 
     public void setBuyOrder(BuyOrder buyOrder) {
         this.buyOrder = buyOrder;
+    }
+
+    public Double getPixValue() {
+        return pixValue;
+    }
+
+    public void setPixValue(Double pixValue) {
+        this.pixValue = pixValue;
+    }
+
+    public Double getMoneyValue() {
+        return moneyValue;
+    }
+
+    public void setMoneyValue(Double moneyValue) {
+        this.moneyValue = moneyValue;
     }
 
     @Override
