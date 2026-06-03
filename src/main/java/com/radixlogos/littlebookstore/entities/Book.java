@@ -19,18 +19,20 @@ public class Book {
     private String description;
     @ManyToMany(mappedBy = "books")
     private Set<Genre> genres = new HashSet<>();
-    private String editor;
     private Integer stockQuantity;
     private Double price;
     private String imgUrl;
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private Set<OrderBook> orderBooks = new HashSet<>();
+    @ManyToOne
+    private Editor editor;
+
     public Book() {
+
     }
 
-    public Book(String name, String editor, Integer quantity, Double value) {
+    public Book(String name, Integer quantity, Double value) {
         this.name = name;
-        this.editor = editor;
         this.stockQuantity = quantity;
         this.price = value;
     }
@@ -49,14 +51,6 @@ public class Book {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getEditor() {
-        return editor;
-    }
-
-    public void setEditor(String editor) {
-        this.editor = editor;
     }
 
     public Integer getStockQuantity() {
@@ -109,6 +103,14 @@ public class Book {
 
     public String getDescription() {
         return description;
+    }
+
+    public Editor getEditor() {
+        return editor;
+    }
+
+    public void setEditor(Editor editor) {
+        this.editor = editor;
     }
 
     public void setDescription(String description) {

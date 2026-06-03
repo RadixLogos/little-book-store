@@ -10,6 +10,7 @@ public record BuyOrderRequestDTO(
         Long id,
         @NotNull(message = "Must inform the client")
         Long clientId,
+        String clientName,
         @NotNull(message = "Must inform the date that the book was sold")
         LocalDate orderDate,
         String receiptUrl,
@@ -21,6 +22,7 @@ public record BuyOrderRequestDTO(
         return new BuyOrderRequestDTO(
                 buyOrder.getId(),
                 buyOrder.getClient().getId(),
+                buyOrder.getClient().getName(),
                 buyOrder.getOrderDate(),
                 buyOrder.getReceiptUrl(),
                 buyOrder.getOrderBooks().stream().map( OrderBookDTO::fromOrderBook).toList());

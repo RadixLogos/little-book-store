@@ -22,6 +22,15 @@ public record OrderBookDTO(
         Long bookId,
         Double subtotal) {
     public static OrderBookDTO fromOrderBook(OrderBook orderBook){
-        return new OrderBookDTO(orderBook.getId(),orderBook.getBook().getName(),orderBook.getQuantity(),orderBook.getSoldValue(), orderBook.getPixValue(), orderBook.getMoneyValue(), orderBook.getId(), orderBook.getSubTotal());
+        System.out.println(orderBook.getSubTotal());
+        return new OrderBookDTO(
+                orderBook.getId(),
+                orderBook.getBook().getName(),
+                orderBook.getQuantity(),
+                orderBook.getPixValue(),
+                orderBook.getMoneyValue(),
+                orderBook.getSoldValue(),
+                orderBook.getBook().getId(),
+                orderBook.getSubTotal());
     }
 }

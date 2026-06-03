@@ -1,6 +1,7 @@
 package com.radixlogos.littlebookstore.services;
 
 import com.radixlogos.littlebookstore.dto.BookDTO;
+import com.radixlogos.littlebookstore.dto.EditorDTO;
 import com.radixlogos.littlebookstore.dto.GenreDTO;
 import com.radixlogos.littlebookstore.entities.Book;
 import com.radixlogos.littlebookstore.entities.Genre;
@@ -67,19 +68,22 @@ public class BookService {
 
     private void copyDTOToEntity(Book book, BookDTO bookDTO){
         book.setName(bookDTO.name());
-        book.setEditor(bookDTO.editor());
+        book.setEditor(EditorDTO.fromEditorDTO(bookDTO.editor()));
         book.setAuthor(bookDTO.author());
         book.setDescription(bookDTO.description());
-        
-        for(Long gi : bookDTO.genreIds()){
-            Genre genre = new Genre();
-            if(genreRepository.existsById(gi)){
-                 genre = genreRepository.getReferenceById(gi);
+        if(bookDTO.genreIds() != null){
+            for(Long gId : bookDTO.genreIds()){
+                Genre genre = new Genre();
+                if(genreRepository.existsById(gId)){
+                    genre = genreRepository.getReferenceById(gId);
+                }
+                book.addGenre(genre);
             }
-            book.addGenre(genre);
         }
+
         book.setPrice(bookDTO.price());
         book.setStockQuantity(bookDTO.stockQuantity());
         book.setImgUrl(bookDTO.imgUrl());
     }
+
 }

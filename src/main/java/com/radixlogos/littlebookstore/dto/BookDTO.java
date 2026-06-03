@@ -12,8 +12,8 @@ import java.util.List;
 public record BookDTO(Long id,
                       @NotBlank(message = "Must inform the name")
                       String name,
-                      @NotBlank(message = "Must inform the editor")
-                      String editor,
+                      @NotNull(message = "Must inform the editor")
+                      EditorDTO editor,
                       String author,
                       String description,
                       List<Long> genreIds,
@@ -28,6 +28,7 @@ public record BookDTO(Long id,
 
     public static BookDTO fromBook(Book book){
       List<Long> genreIds = book.getGenres().stream().map(Genre::getId).toList();
-        return new BookDTO(book.getId(), book.getName(), book.getEditor(), book.getAuthor(), book.getDescription(),genreIds,book.getPrice(), book.getStockQuantity(), book.getImgUrl());
+      EditorDTO editorDTO = new EditorDTO(book.getId(), book.getName());
+      return new BookDTO(book.getId(), book.getName(), editorDTO, book.getAuthor(), book.getDescription(),genreIds,book.getPrice(), book.getStockQuantity(), book.getImgUrl());
     }
 }

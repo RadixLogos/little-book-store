@@ -1,6 +1,7 @@
 package com.radixlogos.littlebookstore.dto;
 
 import com.radixlogos.littlebookstore.entities.BuyOrder;
+import com.radixlogos.littlebookstore.entities.OrderBook;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
@@ -20,9 +21,9 @@ public record BuyOrderResponseDTO(
         public static BuyOrderResponseDTO fromBuyOrder(BuyOrder buyOrder){
         var client = ClientDTO.fromClient(buyOrder.getClient());
         List<OrderBookDTO> orderBooks = new ArrayList<>();
-        buyOrder.getOrderBooks().forEach(ob ->{
-            orderBooks.add(OrderBookDTO.fromOrderBook(ob));
-        });
+        for(OrderBook ob : buyOrder.getOrderBooks() ){
+                orderBooks.add(OrderBookDTO.fromOrderBook(ob));
+        }
         return new BuyOrderResponseDTO(buyOrder.getId(),client,buyOrder.getOrderDate(),orderBooks, buyOrder.getTotal());
     }
 }
