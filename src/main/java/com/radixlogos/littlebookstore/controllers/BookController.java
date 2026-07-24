@@ -1,6 +1,7 @@
 package com.radixlogos.littlebookstore.controllers;
 
 import com.radixlogos.littlebookstore.dto.BookDTO;
+import com.radixlogos.littlebookstore.dto.filter.BookFilterDTO;
 import com.radixlogos.littlebookstore.services.BookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ public class BookController {
     @GetMapping
     public ResponseEntity<Page<BookDTO>> findAll(
             Pageable pageable,
-            @RequestParam(defaultValue = "") String name){
-        var response = service.findAllBooks(pageable,name);
+            @ModelAttribute BookFilterDTO bookFilter){
+        var response = service.findAllBooks(pageable,bookFilter);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")

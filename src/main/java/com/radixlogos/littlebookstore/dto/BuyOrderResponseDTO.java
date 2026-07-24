@@ -16,6 +16,7 @@ public record BuyOrderResponseDTO(
         LocalDate orderDate,
         @NotNull(message = "Must inform the books that were ordered")
         List<OrderBookDTO> orderBooks,
+        String receiptUrl,
         Double total) {
 
         public static BuyOrderResponseDTO fromBuyOrder(BuyOrder buyOrder){
@@ -24,6 +25,6 @@ public record BuyOrderResponseDTO(
         for(OrderBook ob : buyOrder.getOrderBooks() ){
                 orderBooks.add(OrderBookDTO.fromOrderBook(ob));
         }
-        return new BuyOrderResponseDTO(buyOrder.getId(),client,buyOrder.getOrderDate(),orderBooks, buyOrder.getTotal());
+        return new BuyOrderResponseDTO(buyOrder.getId(),client,buyOrder.getOrderDate(),orderBooks, buyOrder.getReceiptUrl(), buyOrder.getTotal());
     }
 }

@@ -17,7 +17,7 @@ public class Book {
     private String author;
     @Column(columnDefinition = "TEXT")
     private String description;
-    @ManyToMany(mappedBy = "books")
+    @ManyToMany(mappedBy = "books", cascade = CascadeType.ALL)
     private Set<Genre> genres = new HashSet<>();
     private Integer stockQuantity;
     private Double price;

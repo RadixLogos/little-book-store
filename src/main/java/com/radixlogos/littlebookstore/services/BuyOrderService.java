@@ -53,13 +53,14 @@ public class BuyOrderService {
     }
     @Transactional
     public BuyOrderRequestDTO updateBuyOrder(Long id, BuyOrderRequestDTO buyOrderDTO){
-        isUpdate = true;
         if (!buyOrderRepository.existsById(id)){
             throw new ResourceNotFoundException("Pedido não encontrado");
         }
         var buyOrderEntity = buyOrderRepository.getReferenceById(id);
 
         copyDtoToEntity(buyOrderDTO,buyOrderEntity);
+        updateOrderBooks(buyOrderDTO,buyOrderEntity);
+
         buyOrderEntity = buyOrderRepository.save(buyOrderEntity);
         return BuyOrderRequestDTO.entityToDTO(buyOrderEntity);
     }
@@ -77,7 +78,6 @@ public class BuyOrderService {
     private void copyDtoToEntity(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity) {
         var client = clientRepository.findById(buyOrderDTO.clientId())
                 .orElseThrow(()-> new ResourceNotFoundException("Cliente não encontrado"));
-        client.setName(buyOrderDTO.clientName() == null ? client.getName() : buyOrderDTO.clientName());
         buyOrderEntity.setClient(client);
         buyOrderEntity.setOrderDate(buyOrderDTO.orderDate());
         buyOrderEntity.setReceiptUrl(buyOrderDTO.receiptUrl());
@@ -89,21 +89,48 @@ public class BuyOrderService {
         for(OrderBookDTO orderBookDTO : buyOrderDTO.orderBooks()) {
             buyOrderEntity.setTotal(total);
             var book = findBook(orderBookDTO.bookId());
-            if (verifyUpdate(orderBookDTO)) {
-                manageStock(book, orderBookDTO.quantity());
-            }
-            var orderBook = new OrderBook();
-            orderBook.setBook(book);
-            orderBook.setQuantity(orderBookDTO.quantity());
-            orderBook.setPixValue(orderBookDTO.pixValue());
-            orderBook.setMoneyValue(orderBookDTO.moneyValue());
-            orderBook.setSoldValue(orderBook.getMoneyValue() + orderBook.getPixValue());
-            orderBook.setSubTotal(calculateOrderBookSubtotal(orderBookDTO.soldValue(), orderBookDTO.quantity()));
-            orderBook.setBuyOrder(buyOrderEntity);
+            manageStock(book, orderBookDTO.quantity());
+            var orderBook = getOrderBook(buyOrderEntity, orderBookDTO, book);
             total += orderBook.getSubTotal();
             buyOrderEntity.addOrderBooks(orderBook);
         }
         buyOrderEntity.setTotal(total);
+    }
+
+    private OrderBook getOrderBook(BuyOrder buyOrderEntity, OrderBookDTO orderBookDTO, Book book) {
+        var orderBook = new OrderBook();
+        orderBook.setBook(book);
+        orderBook.setQuantity(orderBookDTO.quantity());
+        orderBook.setPixValue(orderBookDTO.pixValue());
+        orderBook.setMoneyValue(orderBookDTO.moneyValue());
+        orderBook.setSoldValue(orderBook.getMoneyValue() + orderBook.getPixValue());
+        orderBook.setSubTotal(calculateOrderBookSubtotal(orderBookDTO.soldValue(), orderBookDTO.quantity()));
+        orderBook.setBuyOrder(buyOrderEntity);
+        return orderBook;
+    }
+
+    private void updateOrderBooks(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity){
+        if(buyOrderEntity.getOrderBooks().size() > buyOrderDTO.orderBooks().size()){
+            createOrderBook(buyOrderDTO, buyOrderEntity);
+        }
+        for(OrderBookDTO orderBookDTO : buyOrderDTO.orderBooks()){
+            Book book = bookRepository.getReferenceById(orderBookDTO.bookId());
+            OrderBook orderBook = orderBookRepository.getReferenceById(orderBookDTO.id());
+            boolean manageStockUpdate = verifyUpdate(orderBookDTO,orderBook);
+            orderBook.setBook(book);
+            orderBook.setMoneyValue(orderBookDTO.moneyValue());
+            orderBook.setPixValue(orderBookDTO.pixValue());
+            orderBook.setBuyOrder(buyOrderEntity);
+            orderBook.setQuantity(orderBookDTO.quantity());
+            orderBook.setSoldValue(orderBookDTO.soldValue());
+            orderBook.setSubTotal(orderBook.getQuantity()* orderBook.getSoldValue());
+            if(manageStockUpdate){
+                manageStock(book,orderBook.getQuantity());
+            }
+
+            orderBookRepository.save(orderBook);
+        }
+
     }
 
     private Book findBook(Long id){
@@ -125,12 +152,7 @@ public class BuyOrderService {
         }
         book.setStockQuantity(book.getStockQuantity() - requestedQuantity);
     }
-private boolean verifyUpdate(OrderBookDTO orderBookDTO){
-        if(orderBookDTO.id() == null){
-            return true;
-        }
-        var orderBook = orderBookRepository.findById(orderBookDTO.id()).orElseThrow(
-                ()-> new ResourceNotFoundException("Livro do pedido não encontrado"));
-    return orderBook.getQuantity() != orderBookDTO.quantity();
-}
+    private boolean verifyUpdate(OrderBookDTO orderBookDTO, OrderBook orderBookEntity){
+        return orderBookEntity.getQuantity() != orderBookDTO.quantity();
+    }
 }

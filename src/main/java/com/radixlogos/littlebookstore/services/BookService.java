@@ -3,6 +3,7 @@ package com.radixlogos.littlebookstore.services;
 import com.radixlogos.littlebookstore.dto.BookDTO;
 import com.radixlogos.littlebookstore.dto.EditorDTO;
 import com.radixlogos.littlebookstore.dto.GenreDTO;
+import com.radixlogos.littlebookstore.dto.filter.BookFilterDTO;
 import com.radixlogos.littlebookstore.entities.Book;
 import com.radixlogos.littlebookstore.entities.Genre;
 import com.radixlogos.littlebookstore.repositories.BookRepository;
@@ -12,9 +13,15 @@ import com.radixlogos.littlebookstore.services.exceptions.ResourceNotFoundExcept
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class BookService {
@@ -22,10 +29,53 @@ public class BookService {
     private BookRepository bookRepository;
     @Autowired
     private GenreRepository genreRepository;
+
     @Transactional(readOnly = true)
-    public Page<BookDTO> findAllBooks(Pageable pageable, String name){
-        return bookRepository.findAllPaged(pageable, name).map(BookDTO::fromBook);
+    public Page<BookDTO> findAllBooks(Pageable pageable, BookFilterDTO bookFilter){
+        if(
+            !bookFilter.getName().isEmpty()
+            && bookFilter.getEditorId() == null
+            && bookFilter.getGenreId() == null){
+            return bookRepository.findAllPagedByName(pageable,bookFilter.getName()).map(BookDTO::fromBook);
+        } else if (
+                !bookFilter.getName().isEmpty()
+                && bookFilter.getEditorId() != null
+                && bookFilter.getGenreId() == null) {
+            return bookRepository.findAllPagedByNameEditor(pageable,bookFilter.getName(), bookFilter.getEditorId()).map(BookDTO::fromBook);
+        } else if (
+                !bookFilter.getName().isEmpty()
+                && bookFilter.getEditorId() != null
+                && bookFilter.getGenreId() != null) {
+            return bookRepository.findAllPagedByNameEditorGenre(pageable,bookFilter.getName(), bookFilter.getEditorId(), bookFilter.getGenreId()).map(BookDTO::fromBook);
+        } else if (
+                !bookFilter.getName().isEmpty()
+                && bookFilter.getEditorId() == null
+                && bookFilter.getGenreId() != null) {
+            return bookRepository.findAllPagedByNameGenre(pageable,bookFilter.getName(), bookFilter.getGenreId()).map(BookDTO::fromBook);
+        }  else if (
+                bookFilter.getName().isEmpty()
+                && bookFilter.getEditorId() != null
+                && bookFilter.getGenreId() != null) {
+            return bookRepository.findAllPagedByEditorGenre(pageable,bookFilter.getEditorId(), bookFilter.getGenreId()).map(BookDTO::fromBook);
+
+        } else if (
+                bookFilter.getName().isEmpty()
+                && bookFilter.getEditorId() == null
+                && bookFilter.getGenreId() != null) {
+            return bookRepository.findAllPagedByGenre(pageable,bookFilter.getGenreId()).map(BookDTO::fromBook);
+
+        } else if (
+                bookFilter.getName().isEmpty()
+                && bookFilter.getEditorId() != null
+                && bookFilter.getGenreId() == null) {
+            return bookRepository.findAllPagedByEditor(pageable,bookFilter.getEditorId()).map(BookDTO::fromBook);
+
+        } else {
+            return bookRepository.findAll(pageable).map(BookDTO::fromBook);
+        }
+
     }
+
     @Transactional(readOnly = true)
     public BookDTO findBookById(Long bookId){
         if(bookRepository.findById(bookId).isEmpty()){
@@ -46,7 +96,7 @@ public class BookService {
         if(!bookRepository.existsById(bookId)){
             throw new ResourceNotFoundException("Livro não encontrado");
         }
-        var book = bookRepository.getReferenceById(bookId);
+        var book = bookRepository.findById(bookId).orElseThrow(()-> new ResourceNotFoundException("Livro não encontrado"));
         copyDTOToEntity(book,bookDTO);
         bookRepository.save(book);
         return BookDTO.fromBook(book);
@@ -71,14 +121,16 @@ public class BookService {
         book.setEditor(EditorDTO.fromEditorDTO(bookDTO.editor()));
         book.setAuthor(bookDTO.author());
         book.setDescription(bookDTO.description());
-        if(bookDTO.genreIds() != null){
-            for(Long gId : bookDTO.genreIds()){
-                Genre genre = new Genre();
-                if(genreRepository.existsById(gId)){
-                    genre = genreRepository.getReferenceById(gId);
-                }
-                book.addGenre(genre);
+        book.setImgUrl(bookDTO.imgUrl());
+        if(bookDTO.genres() != null){
+            List<Long> genresIds = new ArrayList<>();
+            for(GenreDTO genreDTO : bookDTO.genres()){
+                Genre genre = genreRepository.getReferenceById(genreDTO.id());
+                genre.addBooks(book);
+                genresIds.add(genreDTO.id());
             }
+
+            genreRepository.deleteWhenNotInUpdate(genresIds,bookDTO.id());
         }
 
         book.setPrice(bookDTO.price());

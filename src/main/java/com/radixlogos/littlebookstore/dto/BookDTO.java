@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public record BookDTO(Long id,
@@ -17,6 +16,7 @@ public record BookDTO(Long id,
                       String author,
                       String description,
                       List<Long> genreIds,
+                      List<GenreDTO> genres,
                       @NotNull(message = "Must inform the price")
                       @PositiveOrZero(message = "The price must be a positive value")
                       Double price,
@@ -28,7 +28,7 @@ public record BookDTO(Long id,
 
     public static BookDTO fromBook(Book book){
       List<Long> genreIds = book.getGenres().stream().map(Genre::getId).toList();
-      EditorDTO editorDTO = new EditorDTO(book.getId(), book.getName());
-      return new BookDTO(book.getId(), book.getName(), editorDTO, book.getAuthor(), book.getDescription(),genreIds,book.getPrice(), book.getStockQuantity(), book.getImgUrl());
+      EditorDTO editorDTO = new EditorDTO(book.getEditor().getId(), book.getEditor().getName());
+      return new BookDTO(book.getId(), book.getName(), editorDTO, book.getAuthor(), book.getDescription(),genreIds,book.getGenres().stream().map(GenreDTO::fromGenre).toList(),book.getPrice(), book.getStockQuantity(), book.getImgUrl());
     }
 }

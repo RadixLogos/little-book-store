@@ -4,9 +4,9 @@ import com.radixlogos.littlebookstore.entities.Genre;
 
 import java.util.List;
 
-public record GenreDTO(Long id, String name, List<BookDTO> books) {
+public record GenreDTO(Long id, String name) {
 
     public static GenreDTO fromGenre(Genre genre){
-        return new GenreDTO(genre.getId(),genre.getName(),genre.getBooks().stream().map(BookDTO::fromBook).toList());
+        return new GenreDTO(genre.getId(),genre.getName());
     }
 }
