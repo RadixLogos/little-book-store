@@ -18,10 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -71,7 +69,7 @@ public class BookService {
             return bookRepository.findAllPagedByEditor(pageable,bookFilter.getEditorId()).map(BookDTO::fromBook);
 
         } else {
-            return bookRepository.findAll(pageable).map(BookDTO::fromBook);
+            return bookRepository.findAllPaged(pageable).map(BookDTO::fromBook);
         }
 
     }
@@ -122,6 +120,7 @@ public class BookService {
         book.setAuthor(bookDTO.author());
         book.setDescription(bookDTO.description());
         book.setImgUrl(bookDTO.imgUrl());
+        System.out.println(bookDTO.imgUrl());
         if(bookDTO.genres() != null){
             List<Long> genresIds = new ArrayList<>();
             for(GenreDTO genreDTO : bookDTO.genres()){

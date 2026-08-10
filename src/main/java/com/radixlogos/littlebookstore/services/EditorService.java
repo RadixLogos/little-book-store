@@ -19,8 +19,8 @@ public class EditorService {
     private EditorRepository editorRepository;
 
     @Transactional
-    public List<EditorDTO> findAllEditors(){
-        return editorRepository.findAll().stream().map(EditorDTO::fromEditor).toList();
+    public Page<EditorDTO> findAllEditors(Pageable pageable){
+        return editorRepository.findAllEditors(pageable).map(EditorDTO::fromEditor);
     }
 
     @Transactional

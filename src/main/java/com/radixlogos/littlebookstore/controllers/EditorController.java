@@ -20,9 +20,9 @@ public class EditorController {
     private EditorService service;
 
     @GetMapping
-    public ResponseEntity<List<EditorDTO>> findAll(
-            @RequestParam(defaultValue = "") String name){
-        var response = service.findAllEditors();
+    public ResponseEntity<Page<EditorDTO>> findAll(
+            @RequestParam(defaultValue = "") String name, Pageable pageable){
+        var response = service.findAllEditors(pageable);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")

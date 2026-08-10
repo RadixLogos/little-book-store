@@ -4,6 +4,8 @@ import com.radixlogos.littlebookstore.dto.GenreDTO;
 import com.radixlogos.littlebookstore.entities.Genre;
 import com.radixlogos.littlebookstore.services.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,8 +23,8 @@ public class GenreController {
     private GenreService genreService;
 
     @GetMapping
-    public ResponseEntity<List<GenreDTO>> getAllGenres(){
-        List<GenreDTO> genreDTOS = genreService.getAllGenres();
+    public ResponseEntity<Page<GenreDTO>> getAllGenres(Pageable pageable){
+        Page<GenreDTO> genreDTOS = genreService.getAllGenres(pageable);
         return ResponseEntity.ok(genreDTOS);
     }
     @GetMapping("/{id}")
