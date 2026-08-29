@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -19,6 +20,7 @@ public class ClientController {
     private ClientService service;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<Page<ClientDTO>> findAll(
             Pageable pageable,
             @RequestParam(defaultValue = "") String name,
@@ -27,11 +29,13 @@ public class ClientController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<ClientDTO> getClient(@PathVariable Long id){
         var response = service.findClientById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<ClientDTO> insertClient(@Valid @RequestBody ClientDTO clientDTO){
         var response = service.insertClient(clientDTO);
         URI uri = ServletUriComponentsBuilder
@@ -43,6 +47,7 @@ public class ClientController {
         }
 
         @PutMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
         public ResponseEntity<ClientDTO> updateClient(
                 @PathVariable Long id,
                 @Valid @RequestBody ClientDTO clientDTO){
@@ -50,6 +55,7 @@ public class ClientController {
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id){
         service.deleteClient(id);
         return ResponseEntity.noContent().build();

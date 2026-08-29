@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -26,11 +27,13 @@ public class EditorController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<EditorDTO> getEditor(@PathVariable Long id){
         var response = service.findEditorById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<EditorDTO> insertEditor(@Valid @RequestBody EditorDTO bookDTO){
         var response = service.insertEditor(bookDTO);
         URI uri = ServletUriComponentsBuilder
@@ -42,6 +45,7 @@ public class EditorController {
         }
 
         @PutMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
         public ResponseEntity<EditorDTO> updateEditor(
                 @PathVariable Long id,
                 @Valid @RequestBody EditorDTO bookDTO){
@@ -49,6 +53,7 @@ public class EditorController {
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> deleteEditor(@PathVariable Long id){
         service.deleteEditor(id);
         return ResponseEntity.noContent().build();

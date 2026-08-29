@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -32,6 +33,7 @@ public class BookController {
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<BookDTO> insertBook(@Valid @RequestBody BookDTO bookDTO){
         var response = service.insertBook(bookDTO);
         URI uri = ServletUriComponentsBuilder
@@ -43,6 +45,7 @@ public class BookController {
         }
 
         @PutMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN')")
         public ResponseEntity<BookDTO> updateBook(
                 @PathVariable Long id,
                 @Valid @RequestBody BookDTO bookDTO){
@@ -50,6 +53,7 @@ public class BookController {
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id){
         service.deleteBook(id);
         return ResponseEntity.noContent().build();

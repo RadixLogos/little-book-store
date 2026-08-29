@@ -2,6 +2,7 @@ package com.radixlogos.littlebookstore.controllers;
 
 import com.radixlogos.littlebookstore.services.ImageService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ public class ImageController {
     }
 
     @PostMapping("/upload")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Map<String,Object>> upload(
             @RequestParam("file") MultipartFile file           ) {
 

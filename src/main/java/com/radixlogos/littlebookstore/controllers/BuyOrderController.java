@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -20,6 +21,7 @@ public class BuyOrderController {
     private BuyOrderService service;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<Page<BuyOrderResponseDTO>> findAll(
             Pageable pageable,
             @RequestParam(name = "clientName", defaultValue = "", required = false)  String clientName,
@@ -28,14 +30,14 @@ public class BuyOrderController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<BuyOrderResponseDTO> getBuyOrder(@PathVariable Long id){
         var response = service.findOrderById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<BuyOrderRequestDTO> insertBuyOrder(@Valid @RequestBody BuyOrderRequestDTO buyOrderDTO){
-        System.out.println(buyOrderDTO.clientId());
-        System.out.println(buyOrderDTO.orderBooks().get(0).bookId());
 
         var response = service.insertBuyOrder(buyOrderDTO);
         URI uri = ServletUriComponentsBuilder
@@ -54,6 +56,7 @@ public class BuyOrderController {
         return ResponseEntity.ok().body(response);
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> deleteBuyOrder(@PathVariable Long id){
         service.deleteBuyOrder(id);
         return ResponseEntity.noContent().build();

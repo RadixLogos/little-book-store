@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -28,10 +29,12 @@ public class GenreController {
         return ResponseEntity.ok(genreDTOS);
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<GenreDTO> findById(@RequestParam Long id){
         return ResponseEntity.ok(genreService.findGenreById(id));
     }
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<GenreDTO> insertGenre(@RequestBody GenreDTO genreDTO){
         GenreDTO response = genreService.insertGenre(genreDTO);
 
@@ -43,6 +46,7 @@ public class GenreController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<GenreDTO> updateGenre(@RequestParam Long id, @RequestBody GenreDTO genreDTO){
         return ResponseEntity.ok(genreService.updateGenre(id,genreDTO));
     }
