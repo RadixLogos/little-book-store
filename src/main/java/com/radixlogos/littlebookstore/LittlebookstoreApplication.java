@@ -12,9 +12,6 @@ public class LittlebookstoreApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(LittlebookstoreApplication.class, args);
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		String password = encoder.encode("opfsspx2021cwb");
-		System.out.println("senha: " + password);
 	}
 
 	@PostConstruct

@@ -4,6 +4,7 @@ package com.radixlogos.littlebookstore.config;
 import com.radixlogos.littlebookstore.entities.User;
 import com.radixlogos.littlebookstore.services.JWTService;
 import com.radixlogos.littlebookstore.services.UserDetailsServiceImpl;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        try {
+
+
         String authHeader = request.getHeader("Authorization");
 
         if(authHeader == null  || authHeader.isEmpty()){
@@ -52,5 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
     filterChain.doFilter(request,response);
+    } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write(
+                    "{\"message\":\"Token expirado\"}"
+            );
+        }
     }
 }
