@@ -15,7 +15,7 @@ public record BuyOrderRequestDTO(
         LocalDate orderDate,
         String receiptUrl,
         @NotNull(message = "Must inform the books that were ordered")
-        List<OrderBookDTO> orderBooks
+        List<OrderRequestDTO> orders
         ) {
 
     public static BuyOrderRequestDTO entityToDTO(BuyOrder buyOrder){
@@ -25,6 +25,6 @@ public record BuyOrderRequestDTO(
                 buyOrder.getClient().getName(),
                 buyOrder.getOrderDate(),
                 buyOrder.getReceiptUrl(),
-                buyOrder.getOrderBooks().stream().map( OrderBookDTO::fromOrderBook).toList());
+                buyOrder.getOrders().stream().map( OrderRequestDTO::fromOrder).toList());
     }
 }

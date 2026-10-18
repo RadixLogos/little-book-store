@@ -1,19 +1,14 @@
 package com.radixlogos.littlebookstore.services;
 
-import com.radixlogos.littlebookstore.dto.BookDTO;
 import com.radixlogos.littlebookstore.dto.BuyOrderRequestDTO;
 import com.radixlogos.littlebookstore.dto.BuyOrderResponseDTO;
-import com.radixlogos.littlebookstore.dto.OrderBookDTO;
-import com.radixlogos.littlebookstore.entities.Book;
-import com.radixlogos.littlebookstore.entities.BuyOrder;
-import com.radixlogos.littlebookstore.entities.OrderBook;
-import com.radixlogos.littlebookstore.repositories.BookRepository;
-import com.radixlogos.littlebookstore.repositories.BuyOrderRepository;
-import com.radixlogos.littlebookstore.repositories.ClientRepository;
-import com.radixlogos.littlebookstore.repositories.OrderBookRepository;
+import com.radixlogos.littlebookstore.dto.OrderRequestDTO;
+import com.radixlogos.littlebookstore.entities.*;
+import com.radixlogos.littlebookstore.repositories.*;
 import com.radixlogos.littlebookstore.services.exceptions.BookException;
 import com.radixlogos.littlebookstore.services.exceptions.DatabaseException;
 import com.radixlogos.littlebookstore.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +25,10 @@ public class BuyOrderService {
     @Autowired
     private BookRepository bookRepository;
     @Autowired
-    private OrderBookRepository orderBookRepository;
-    private boolean isUpdate = false;
+    private OrderRepository orderRepository;
+    @Autowired
+    private ArticleRepository articleRepository;
+
     @Transactional(readOnly = true)
     public Page<BuyOrderResponseDTO> findAllBuyOrders(Pageable pageable, String clientName, String bookName){
 
@@ -44,13 +41,14 @@ public class BuyOrderService {
                         .orElseThrow(()-> new ResourceNotFoundException("Pedido não encontrado")));
     }
     @Transactional
-    public BuyOrderRequestDTO insertBuyOrder(BuyOrderRequestDTO  buyOrderDTO){
+    public BuyOrderRequestDTO insertBuyOrderBook(BuyOrderRequestDTO  buyOrderDTO){
         var buyOrderEntity = new BuyOrder();
         copyDtoToEntity(buyOrderDTO,buyOrderEntity);
-        createOrderBook(buyOrderDTO,buyOrderEntity);
+        createOrder(buyOrderDTO,buyOrderEntity);
         buyOrderEntity = buyOrderRepository.save(buyOrderEntity);
         return BuyOrderRequestDTO.entityToDTO(buyOrderEntity);
     }
+
     @Transactional
     public BuyOrderRequestDTO updateBuyOrder(Long id, BuyOrderRequestDTO buyOrderDTO){
         if (!buyOrderRepository.existsById(id)){
@@ -64,17 +62,41 @@ public class BuyOrderService {
         buyOrderEntity = buyOrderRepository.save(buyOrderEntity);
         return BuyOrderRequestDTO.entityToDTO(buyOrderEntity);
     }
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional
     public void deleteBuyOrder(Long id){
         if(!buyOrderRepository.existsById(id)){
             throw new ResourceNotFoundException("Pedido não encontrado");
         }
         try {
+            BuyOrder buyOrder = buyOrderRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Pedido não encontrado"));
+
+            for(Order order : buyOrder.getOrders()){
+                if(order.getBook() != null){
+                    updateBookQuantity(order.getBook().getId(),order.getQuantity());
+                }
+                if(order.getArticle() != null){
+                    updateArticleQuantity(order.getArticle().getId(),order.getQuantity());
+                }
+            }
             buyOrderRepository.deleteById(id);
         }catch (Exception e){
+            e.printStackTrace();
             throw new DatabaseException("Falha de integridade referencial");
         }
     }
+
+    private void updateBookQuantity(Long bookId, Integer restoreQuantity) {
+        Book book = bookRepository.getReferenceById(bookId);
+        book.setStockQuantity(book.getStockQuantity() + restoreQuantity);
+        bookRepository.save(book);
+    }
+
+    private void updateArticleQuantity(Long articleId, Integer restoreQuantity) {
+        Article article = articleRepository.getReferenceById(articleId);
+        article.setStockQuantity(article.getStockQuantity() + restoreQuantity);
+        articleRepository.save(article);
+    }
+
     private void copyDtoToEntity(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity) {
         var client = clientRepository.findById(buyOrderDTO.clientId())
                 .orElseThrow(()-> new ResourceNotFoundException("Cliente não encontrado"));
@@ -83,52 +105,92 @@ public class BuyOrderService {
         buyOrderEntity.setReceiptUrl(buyOrderDTO.receiptUrl());
 
     }
-    private void createOrderBook(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity){
+    private void createOrder(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity){
         Double total = 0.0;
 
-        for(OrderBookDTO orderBookDTO : buyOrderDTO.orderBooks()) {
+        for(OrderRequestDTO orderDTO : buyOrderDTO.orders()) {
             buyOrderEntity.setTotal(total);
-            var book = findBook(orderBookDTO.bookId());
-            manageStock(book, orderBookDTO.quantity());
-            var orderBook = getOrderBook(buyOrderEntity, orderBookDTO, book);
-            total += orderBook.getSubTotal();
-            buyOrderEntity.addOrderBooks(orderBook);
+            if(orderDTO.itemType().equals("book")){
+                var book = findBook(orderDTO.itemId());
+                if(manageStock(book.getStockQuantity(), orderDTO.quantity())){
+                    book.setStockQuantity(book.getStockQuantity() - orderDTO.quantity());
+                };
+                var orderBook = getOrder(buyOrderEntity, orderDTO);
+                orderBook.setBook(book);
+                total += orderBook.getSubTotal();
+                buyOrderEntity.addOrders(orderBook);
+            }
+            if(orderDTO.itemType().equals("article")){
+                var article = findArticle(orderDTO.itemId());
+                if(manageStock(article.getStockQuantity(), orderDTO.quantity())){
+                    article.setStockQuantity(article.getStockQuantity() - orderDTO.quantity());
+                };
+                var orderArticle = getOrder(buyOrderEntity, orderDTO);
+                orderArticle.setArticle(article);
+                total += orderArticle.getSubTotal();
+                buyOrderEntity.addOrders(orderArticle);
+            }
+
         }
         buyOrderEntity.setTotal(total);
     }
 
-    private OrderBook getOrderBook(BuyOrder buyOrderEntity, OrderBookDTO orderBookDTO, Book book) {
-        var orderBook = new OrderBook();
-        orderBook.setBook(book);
-        orderBook.setQuantity(orderBookDTO.quantity());
-        orderBook.setPixValue(orderBookDTO.pixValue());
-        orderBook.setMoneyValue(orderBookDTO.moneyValue());
-        orderBook.setSoldValue(orderBook.getMoneyValue() + orderBook.getPixValue());
-        orderBook.setSubTotal(calculateOrderBookSubtotal(orderBookDTO.soldValue(), orderBookDTO.quantity()));
-        orderBook.setBuyOrder(buyOrderEntity);
-        return orderBook;
+
+    private Order getOrder(BuyOrder buyOrderEntity, OrderRequestDTO orderDTO) {
+        var order = new Order();
+        order.setQuantity(orderDTO.quantity());
+        order.setPixValue(orderDTO.pixValue());
+        order.setMoneyValue(orderDTO.moneyValue());
+        order.setSoldValue(order.getMoneyValue() + order.getPixValue());
+        order.setSubTotal(calculateOrderBookSubtotal(orderDTO.pixValue() + orderDTO.moneyValue(), orderDTO.quantity()));
+        order.setBuyOrder(buyOrderEntity);
+        return order;
     }
 
     private void updateOrderBooks(BuyOrderRequestDTO buyOrderDTO, BuyOrder buyOrderEntity){
-        if(buyOrderEntity.getOrderBooks().size() > buyOrderDTO.orderBooks().size()){
-            createOrderBook(buyOrderDTO, buyOrderEntity);
+        if(buyOrderEntity.getOrders().size() > buyOrderDTO.orders().size()){
+            createOrder(buyOrderDTO, buyOrderEntity);
         }
-        for(OrderBookDTO orderBookDTO : buyOrderDTO.orderBooks()){
-            Book book = bookRepository.getReferenceById(orderBookDTO.bookId());
-            OrderBook orderBook = orderBookRepository.getReferenceById(orderBookDTO.id());
-            boolean manageStockUpdate = verifyUpdate(orderBookDTO,orderBook);
-            orderBook.setBook(book);
-            orderBook.setMoneyValue(orderBookDTO.moneyValue());
-            orderBook.setPixValue(orderBookDTO.pixValue());
-            orderBook.setBuyOrder(buyOrderEntity);
-            orderBook.setQuantity(orderBookDTO.quantity());
-            orderBook.setSoldValue(orderBookDTO.soldValue());
-            orderBook.setSubTotal(orderBook.getQuantity()* orderBook.getSoldValue());
-            if(manageStockUpdate){
-                manageStock(book,orderBook.getQuantity());
-            }
+        Double total = 0.0;
+        for(OrderRequestDTO orderBookDTO : buyOrderDTO.orders()){
 
-            orderBookRepository.save(orderBook);
+            Order order = orderRepository.getReferenceById(orderBookDTO.id());
+            if(orderBookDTO.itemType().equals("book")){
+                Book book = bookRepository.getReferenceById(orderBookDTO.itemId());
+                boolean manageStockUpdate = verifyUpdate(orderBookDTO,order);
+                order.setBook(book);
+                order.setMoneyValue(orderBookDTO.moneyValue());
+                order.setPixValue(orderBookDTO.pixValue());
+                order.setBuyOrder(buyOrderEntity);
+                order.setQuantity(orderBookDTO.quantity());
+                order.setSoldValue(orderBookDTO.soldValue());
+                order.setSubTotal(order.getQuantity()* order.getSoldValue());
+                if(manageStockUpdate){
+                    if(manageStock(book.getStockQuantity(),order.getQuantity())){
+                        book.setStockQuantity(book.getStockQuantity() - orderBookDTO.quantity());
+                    };
+                }
+                total+= order.getSubTotal();
+            }
+            if(orderBookDTO.itemType().equals("article")){
+                boolean manageStockUpdate = verifyUpdate(orderBookDTO,order);
+                Article article = articleRepository.getReferenceById(orderBookDTO.itemId());
+                order.setArticle(article);
+                order.setMoneyValue(orderBookDTO.moneyValue());
+                order.setPixValue(orderBookDTO.pixValue());
+                order.setBuyOrder(buyOrderEntity);
+                order.setQuantity(orderBookDTO.quantity());
+                order.setSoldValue(orderBookDTO.soldValue());
+                order.setSubTotal(order.getQuantity()* order.getSoldValue());
+                if(manageStockUpdate){
+                    if(manageStock(article.getStockQuantity(),order.getQuantity())){
+                        article.setStockQuantity(article.getStockQuantity() - orderBookDTO.quantity());
+                    };
+                }
+                total+= order.getSubTotal();
+            }
+            buyOrderEntity.setTotal(total);
+            orderRepository.save(order);
         }
 
     }
@@ -137,22 +199,29 @@ public class BuyOrderService {
         return bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado"));
     }
+
+    private Article findArticle(Long id){
+        return articleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado"));
+    }
+
     /**The method returns OrderBook subtotal**/
     private Double calculateOrderBookSubtotal(Double soldValue, Integer quantity){
         return soldValue*quantity;
     }
-    private void manageStock(Book book, int requestedQuantity){
 
-        if(book.getStockQuantity() < requestedQuantity){
-            String error = "A quantidade do livro " + book.getName() +" no estoque é insuficiente";
-            if(book.getStockQuantity() > 0){
-                error += ". Quantidade em estoque: " + book.getStockQuantity();
+    private boolean manageStock(int stockQuantity, int requestedQuantity){
+
+        if(stockQuantity < requestedQuantity){
+            String error = "A quantidade no estoque é insuficiente";
+            if(stockQuantity > 0){
+                error += ". Quantidade em estoque: " + stockQuantity;
             }
             throw new BookException(error);
-        }
-        book.setStockQuantity(book.getStockQuantity() - requestedQuantity);
+        } else
+            return true;
     }
-    private boolean verifyUpdate(OrderBookDTO orderBookDTO, OrderBook orderBookEntity){
+    private boolean verifyUpdate(OrderRequestDTO orderBookDTO, Order orderBookEntity){
         return orderBookEntity.getQuantity() != orderBookDTO.quantity();
     }
 }

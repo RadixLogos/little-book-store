@@ -35,11 +35,12 @@ public class BuyOrderController {
         var response = service.findOrderById(id);
         return ResponseEntity.ok().body(response);
     }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','OPERATOR')")
     public ResponseEntity<BuyOrderRequestDTO> insertBuyOrder(@Valid @RequestBody BuyOrderRequestDTO buyOrderDTO){
 
-        var response = service.insertBuyOrder(buyOrderDTO);
+        var response = service.insertBuyOrderBook(buyOrderDTO);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

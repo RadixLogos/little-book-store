@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "tb_order_book")
-public class OrderBook {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,8 +20,11 @@ public class OrderBook {
     @JoinColumn(name = "book_id")
     private Book book;
     @ManyToOne
+    @JoinColumn(name = "article_id")
+    private  Article article;
+    @ManyToOne
     private BuyOrder buyOrder;
-    public OrderBook() {
+    public Order() {
     }
 
     public Long getId() {
@@ -64,6 +67,14 @@ public class OrderBook {
         this.book = book;
     }
 
+    public Article getArticle() {
+        return article;
+    }
+
+    public void setArticle(Article article) {
+        this.article = article;
+    }
+
     public BuyOrder getBuyOrder() {
         return buyOrder;
     }
@@ -91,7 +102,7 @@ public class OrderBook {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        OrderBook orderBook = (OrderBook) o;
+        Order orderBook = (Order) o;
         if (id == null || orderBook.id == null) {
             return false;
         }

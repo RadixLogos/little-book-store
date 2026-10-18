@@ -23,7 +23,7 @@ public class Book {
     private Double price;
     private String imgUrl;
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private Set<OrderBook> orderBooks = new HashSet<>();
+    private Set<Order> orderBooks = new HashSet<>();
     @ManyToOne
     private Editor editor;
 
@@ -77,11 +77,11 @@ public class Book {
         this.price = price;
     }
 
-    public Set<OrderBook> getOrderBooks() {
+    public Set<Order> getOrderBooks() {
         return orderBooks;
     }
 
-    public void addOrderBook(OrderBook orderBook) {
+    public void addOrderBook(Order orderBook) {
         this.orderBooks.add(orderBook);
     }
 

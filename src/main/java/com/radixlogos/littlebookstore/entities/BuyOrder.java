@@ -21,7 +21,7 @@ public class BuyOrder {
     @ManyToOne
     private Client client;
     @OneToMany(mappedBy = "buyOrder", cascade = CascadeType.ALL)
-    private Set<OrderBook> orderBooks = new HashSet<>();
+    private Set<Order> orders = new HashSet<>();
 
     public BuyOrder(Client client,  Double total) {
         this.client = client;
@@ -63,12 +63,12 @@ public class BuyOrder {
         this.total = total;
     }
 
-    public Set<OrderBook> getOrderBooks() {
-        return orderBooks;
+    public Set<Order> getOrders() {
+        return orders;
     }
 
-    public void addOrderBooks(OrderBook orderBook) {
-        this.orderBooks.add(orderBook);
+    public void addOrders(Order orderBook) {
+        this.orders.add(orderBook);
     }
 
     public String getReceiptUrl() {

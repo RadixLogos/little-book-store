@@ -1,7 +1,7 @@
 package com.radixlogos.littlebookstore.dto;
 
 import com.radixlogos.littlebookstore.entities.BuyOrder;
-import com.radixlogos.littlebookstore.entities.OrderBook;
+import com.radixlogos.littlebookstore.entities.Order;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
@@ -15,15 +15,15 @@ public record BuyOrderResponseDTO(
         @NotNull(message = "Must inform the date that the book was sold")
         LocalDate orderDate,
         @NotNull(message = "Must inform the books that were ordered")
-        List<OrderBookDTO> orderBooks,
+        List<OrderRequestDTO> orders,
         String receiptUrl,
         Double total) {
 
         public static BuyOrderResponseDTO fromBuyOrder(BuyOrder buyOrder){
         var client = ClientDTO.fromClient(buyOrder.getClient());
-        List<OrderBookDTO> orderBooks = new ArrayList<>();
-        for(OrderBook ob : buyOrder.getOrderBooks() ){
-                orderBooks.add(OrderBookDTO.fromOrderBook(ob));
+        List<OrderRequestDTO> orderBooks = new ArrayList<>();
+        for(Order ob : buyOrder.getOrders() ){
+                orderBooks.add(OrderRequestDTO.fromOrder(ob));
         }
         return new BuyOrderResponseDTO(buyOrder.getId(),client,buyOrder.getOrderDate(),orderBooks, buyOrder.getReceiptUrl(), buyOrder.getTotal());
     }
