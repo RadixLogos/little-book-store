@@ -158,6 +158,15 @@ public class BuyOrderService {
             if(orderBookDTO.itemType().equals("book")){
                 Book book = bookRepository.getReferenceById(orderBookDTO.itemId());
                 boolean manageStockUpdate = verifyUpdate(orderBookDTO,order);
+                if(manageStockUpdate){
+                    if(orderBookDTO.quantity()< order.getQuantity()){
+                        Integer difference = order.getQuantity() - orderBookDTO.quantity();
+                        book.setStockQuantity(book.getStockQuantity() + difference);
+                    }
+                    else if(manageStock(book.getStockQuantity(),order.getQuantity())){
+                        book.setStockQuantity(book.getStockQuantity() - orderBookDTO.quantity());
+                    };
+                }
                 order.setBook(book);
                 order.setMoneyValue(orderBookDTO.moneyValue());
                 order.setPixValue(orderBookDTO.pixValue());
@@ -165,11 +174,6 @@ public class BuyOrderService {
                 order.setQuantity(orderBookDTO.quantity());
                 order.setSoldValue(orderBookDTO.soldValue());
                 order.setSubTotal(order.getQuantity()* order.getSoldValue());
-                if(manageStockUpdate){
-                    if(manageStock(book.getStockQuantity(),order.getQuantity())){
-                        book.setStockQuantity(book.getStockQuantity() - orderBookDTO.quantity());
-                    };
-                }
                 total+= order.getSubTotal();
             }
             if(orderBookDTO.itemType().equals("article")){

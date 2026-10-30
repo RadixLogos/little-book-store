@@ -2,6 +2,7 @@ package com.radixlogos.littlebookstore.controllers.handler;
 
 import com.radixlogos.littlebookstore.dto.error.CustomError;
 import com.radixlogos.littlebookstore.dto.error.ValidationError;
+import com.radixlogos.littlebookstore.services.exceptions.BookException;
 import com.radixlogos.littlebookstore.services.exceptions.DatabaseException;
 import com.radixlogos.littlebookstore.services.exceptions.ForbiddenException;
 import com.radixlogos.littlebookstore.services.exceptions.ResourceNotFoundException;
@@ -65,4 +66,10 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status.value()).body(err);
     }
 
+    @ExceptionHandler(BookException.class)
+    public ResponseEntity<CustomError> bookException(BookException e, HttpServletRequest request){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status.value()).body(err);
+    }
 }

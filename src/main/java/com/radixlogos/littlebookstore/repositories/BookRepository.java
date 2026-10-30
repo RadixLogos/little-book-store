@@ -23,12 +23,14 @@ public interface BookRepository extends JpaRepository<Book,Long> {
         SELECT *
         FROM tb_books b
         WHERE b.editor_id = :editorId
+        GROUP BY b.stock_quantity, b.name, b.id
         ORDER BY b.stock_quantity desc , b.name asc
         """,
             countQuery = """
         SELECT COUNT(*)
         FROM tb_books b
         WHERE b.editor_id = :editorId
+        GROUP BY b.stock_quantity, b.name, b.id
         ORDER BY b.stock_quantity desc , b.name asc
         """,
             nativeQuery = true
