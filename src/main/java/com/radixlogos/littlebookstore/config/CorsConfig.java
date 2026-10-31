@@ -17,7 +17,7 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:4200","https://little-book-store.onrender.com")
+                List.of("http://localhost:4200","little-book-store-front.rubenshds.workers.dev")
         );
 
         configuration.setAllowedMethods(
